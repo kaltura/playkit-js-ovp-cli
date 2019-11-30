@@ -1,0 +1,147 @@
+$background-color: rgba(33, 33, 33, 0.9);
+
+/* TODO: (1) remove this once 3rd party cross-browser custom scroll bar is Added */
+.flexible-main::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Track TODO: as (1)*/
+.flexible-main::-webkit-scrollbar-track {
+  background: $background-color;
+}
+
+/* Handle TODO: as (1) */
+.flexible-main::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  color: #cccccc;
+  width: 100%;
+  height: 100%;
+}
+
+.headerContainer {
+  padding: 12px 16px 0 12px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    height: 29px;
+    width: 100%;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(102, 102, 102, 0.9);
+  }
+
+  .title {
+    margin-left: 9px;
+    line-height: 28px;
+    font-size: 15px;
+    color: #cccccc;
+  }
+
+  .close-button {
+    background: transparent url('../../assets/close.svg') center/32px no-repeat;
+    border: none;
+    margin-top: 2px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+}
+
+.flexible-main {
+  flex: 1 1 0%;
+  overflow: auto;
+  margin-left: 12px;
+  margin-right: 4px;
+  padding-right: 8px;
+}
+
+.footer {
+  position: relative;
+  margin: 8px 16px 16px 12px;
+}
+
+.no-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-Question-wrapper {
+  width: 100%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-list-img-properties {
+  height: 50%;
+  width: 70%;
+  max-width: 70%;
+  margin: 4px 0 8px 0;
+  background: url('../../assets/no-question-yet.svg') center no-repeat;
+  background-size: contain;
+}
+
+.no-question-yet-image {
+  background: url('../../assets/no-question-yet.svg') center no-repeat;
+  background-size: contain;
+}
+
+.no-announcements-yet-image {
+  background: url('../../assets/no-announcements.svg') center no-repeat;
+  background-size: contain;
+}
+
+.whoopse-error-image {
+  background: url('../../assets/whoopse-error.svg') center no-repeat;
+  background-size: contain;
+}
+
+.empty-list-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: rgba(153, 153, 153, 0.9);
+  text-align: center;
+}
+
+.empty-list-sub-title{
+  text-align: center;
+  font-size: 14px;
+  color: rgba(153, 153, 153, 0.9);
+}
+
+.messages-end-anchor {
+  float: left;
+  clear: both;
+}
+
+.scroll-down-button {
+  position: absolute;
+  z-index: 0;
+  top: -40px;
+  right: 2px;
+  transition-property: top;
+  transition-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+.scroll-down-button-hidden {
+  top: 1px;
+  transition-property: top;
+  transition-timing-function: cubic-bezier(0.4, 0.0, 1, 1);
+}
+
+.scroll-down-button-hidden-announcement-only {
+  top: 20px;
+}
+
