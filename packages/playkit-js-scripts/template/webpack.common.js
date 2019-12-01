@@ -2,7 +2,7 @@ const path = require('path');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 const distFolder = path.join(__dirname, "/dist");
-const pluginName = 'qna';
+const pluginName = 'plugin_name';
 
 module.exports = {
   entry: {
