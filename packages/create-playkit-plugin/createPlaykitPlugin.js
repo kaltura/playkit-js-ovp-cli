@@ -146,35 +146,41 @@ async function askProjectOptions() {
         return true;
     };
 
+    if (projectName) {
+        projectDestination = path.resolve(projectName);
+        projectName = path.basename(projectDestination);
+    }
+
     const askName = {
         type: "text",
         name: "name",
         message: `Please specify the project name:`,
         validate: validation(),
+        initial: projectName,
     };
 
     const askNpmName = name => ({
         type: "text",
         name: "npmName",
-        message: "Please specify the plugin NPM name ( default to @playkit-js/{name}-plugin )",
+        message: "Please specify the plugin NPM name:",
         validate: validation(/^(@[a-z-]+\/[a-z-]+|[a-z-]+)*$/g),
         initial: `@playkit-js/${name}-plugin`,
-    })
+    });
 
     const askGithubRepo = name => ({
         type: "text",
         name: "githubRepo",
-        message: `Please specify the plugin GitHub repository ( default to kaltura/playkit-js-{name} )`,
+        message: `Please specify the plugin GitHub repository:`,
         validate: validation(/^([a-z-]+\/[a-z-]+|[a-z-]+)*$/g),
         initial: `kaltura/playkit-js-${name}`,
-    })
+    });
 
-    const askDestination = name => ({
+    const askDestination = (name) => ({
         type: "text",
         name: "destination",
-        message: `Please specify the destination folder where the plugin will be initialized`,
-        initial: `${process.cwd()}/playkit-js-${name}`,
-    })
+        message: `Please specify the destination folder where the plugin will be initialized:`,
+        initial: projectDestination || `${process.cwd()}/playkit-js-${name}`,
+    });
 
     const {
         name
@@ -206,9 +212,7 @@ function printValidationResults(results) {
 }
 
 (async () => {
-    if (typeof projectName === 'undefined') {
-        await askProjectOptions();
-    }
+    await askProjectOptions();
 
     const hiddenProgram = new commander.Command()
         .option(
@@ -232,16 +236,15 @@ function createApp(
     version,
     template
 ) {
-    const root = path.resolve(projectDestination || name);
-    const folderName = path.basename(root);
+    const folderName = path.basename(projectDestination);
 
     checkAppName(folderName);
-    fs.ensureDirSync(folderName);
-    if (!isSafeToCreateProjectIn(root, folderName)) {
+    fs.ensureDirSync(projectDestination);
+    if (!isSafeToCreateProjectIn(projectDestination, folderName)) {
         process.exit(1);
     }
 
-    console.log(`Creating a new React app in ${chalk.green(root)}.`);
+    console.log(`Creating a new React app in ${chalk.green(projectDestination)}.`);
     console.log();
 
     const packageJson = {
@@ -258,18 +261,18 @@ function createApp(
         },
     };
     fs.writeFileSync(
-        path.join(root, 'package.json'),
+        path.join(projectDestination, 'package.json'),
         JSON.stringify(packageJson, null, 2) + os.EOL
     );
 
     const originalDirectory = process.cwd();
-    process.chdir(root);
+    process.chdir(projectDestination);
     if (!checkThatNpmCanReadCwd()) {
         process.exit(1);
     }
 
     run(
-        root,
+        projectDestination,
         folderName,
         version,
         verbose,
