@@ -340,7 +340,7 @@ function run(
         "classnames",
         "preact",
         "svg-url-loader",
-        __dirname + "/libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz",
+        path.resolve(__dirname + "/libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz"),
     );
 
     const devDependencies = [
