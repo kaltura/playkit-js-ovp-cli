@@ -7,7 +7,10 @@ process.on('unhandledRejection', err => {
 });
 
 const fs = require('fs-extra');
-const {walk, ucfirst} = require('../utils');
+const {
+    walk,
+    ucfirst
+} = require('../utils');
 const format = require("string-template");
 const compile = require("string-template/compile");
 const path = require('path');
@@ -29,7 +32,9 @@ const defaultBrowsers = {
 
 function isInGitRepository() {
     try {
-        execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });
+        execSync('git rev-parse --is-inside-work-tree', {
+            stdio: 'ignore'
+        });
         return true;
     } catch (e) {
         return false;
@@ -39,15 +44,21 @@ function isInGitRepository() {
 function tryGitInit(appPath) {
     let didInit = false;
     try {
-        execSync('git --version', { stdio: 'ignore' });
+        execSync('git --version', {
+            stdio: 'ignore'
+        });
         if (isInGitRepository()) {
             return false;
         }
 
-        execSync('git init', { stdio: 'ignore' });
+        execSync('git init', {
+            stdio: 'ignore'
+        });
         didInit = true;
 
-        execSync('git add -A', { stdio: 'ignore' });
+        execSync('git add -A', {
+            stdio: 'ignore'
+        });
         execSync('git commit -m "Initial commit from Create React App"', {
             stdio: 'ignore',
         });
@@ -70,7 +81,7 @@ function tryGitInit(appPath) {
     }
 }
 
-module.exports = function(
+module.exports = function (
     appPath,
     appName,
     verbose,
@@ -87,12 +98,23 @@ module.exports = function(
 
     // Setup the script rules
     appPackage.scripts = {
-        "start:v2": 'playkit-js-scripts start-v2',
-        "start:v7": 'playkit-js-scripts start-v7',
-        "build:v7": 'playkit-js-scripts build-v7',
-        "build:v2": 'playkit-js-scripts build-v2',
-        "test": 'playkit-js-scripts test',
-        "eject": 'playkit-js-scripts eject',
+        "clean": "rm -rf dist",
+        "reset": "npm run clean && rm -rf node_modules",
+        "build": "webpack --config webpack.prod.js",
+        "build:dev": "webpack --config webpack.dev.js",
+        "serve": "webpack-dev-server --open --config webpack.dev.js",
+        "serve:external": "npm run serve -- --host 0.0.0.0",
+        "analyze": "npm run build && npx source-map-explorer dist/playkit-js-transcript.js",
+        "contrib:latest": "npm i @playkit-js-contrib/{common,ui,plugin}@latest",
+        "contrib:next": "npm i @playkit-js-contrib/{common,ui,plugin}@next",
+        "contrib:local": "npm link @playkit-js-contrib/{common,ui,plugin} --production",
+
+        // "start": 'playkit-js-scripts start',
+        // "start:v7": 'playkit-js-scripts start-v7',
+        // "build": 'playkit-js-scripts build',
+        // "build:v2": 'playkit-js-scripts build-v2',
+        // "test": 'playkit-js-scripts test',
+        // "eject": 'playkit-js-scripts eject',
     };
 
     // Setup the browsers list
@@ -112,9 +134,9 @@ module.exports = function(
     }
 
     // Copy the files for the user
-    const templatePath = template
-        ? path.resolve(originalDirectory, template)
-        : path.join(ownPath, 'template');
+    const templatePath = template ?
+        path.resolve(originalDirectory, template) :
+        path.join(ownPath, 'template');
     if (fs.existsSync(templatePath)) {
         fs.copySync(templatePath, appPath);
     } else {
@@ -169,15 +191,18 @@ module.exports = function(
         console.log(`Installing preact using ${command}...`);
         console.log();
 
-        const proc = spawn.sync(command, args, { stdio: 'inherit' });
+        const proc = spawn.sync(command, args, {
+            stdio: 'inherit'
+        });
         if (proc.status !== 0) {
             console.error(`\`${command} ${args.join(' ')}\` failed`);
             return;
         }
     }
-    replaceTemplate(appPath, appName);
 
-    installSubPackages(appPath);
+    // replaceTemplate(appPath, appName);
+
+    // installSubPackages(appPath);
 
     if (tryGitInit(appPath)) {
         console.log();
@@ -230,7 +255,9 @@ module.exports = function(
 };
 
 function replaceTemplate(appPath, appName) {
-    walkSync(appPath, {ignore: ['node_modules', '.git']})
+    walkSync(appPath, {
+            ignore: ['node_modules', '.git']
+        })
         .filter(file => !path.extname(file).match(/\.(tgz|tar)/))
         .filter(file => fs.statSync(file).isFile())
         .forEach(file => {
@@ -240,7 +267,10 @@ function replaceTemplate(appPath, appName) {
             }
             const className = ucfirst(appName) + "Plugin";
             let template = compile(content);
-            fs.writeFileSync(file, template({className, pluginName: appName}));
+            fs.writeFileSync(file, template({
+                className,
+                pluginName: appName
+            }));
         });
 }
 
@@ -248,10 +278,20 @@ function installSubPackages(appPath, verbose) {
 
     const originalDirectory = process.cwd();
     const packageDirectory = path.join(appPath, 'packages');
-    const packages = fs.readdirSync(packageDirectory).map(file => ({folder: path.join(packageDirectory, file), name: file}))
-        .filter(({folder}) => !fs.statSync(folder).isFile())
-        .filter(({folder}) => fs.existsSync(path.join(folder, 'package.json')));
-    packages.forEach(({folder, name}) => {
+    const packages = fs.readdirSync(packageDirectory).map(file => ({
+            folder: path.join(packageDirectory, file),
+            name: file
+        }))
+        .filter(({
+            folder
+        }) => !fs.statSync(folder).isFile())
+        .filter(({
+            folder
+        }) => fs.existsSync(path.join(folder, 'package.json')));
+    packages.forEach(({
+        folder,
+        name
+    }) => {
         process.chdir(folder);
         let command;
         let args;
@@ -259,7 +299,9 @@ function installSubPackages(appPath, verbose) {
         console.log();
         console.log(`Installing ${chalk.cyan(name)} dependencies, this may take couple of minutes`);
         args = ['install', verbose && '--verbose'].filter(e => e);
-        const proc = spawn.sync(command, args, { stdio: 'inherit' });
+        const proc = spawn.sync(command, args, {
+            stdio: 'inherit'
+        });
         if (proc.status !== 0) {
             console.log();
             console.error(`\`${command} ${args.join(' ')}\` failed`);

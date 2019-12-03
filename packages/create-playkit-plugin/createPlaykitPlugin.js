@@ -116,19 +116,16 @@ const program = new commander.Command(packageJson.name)
 if (program.info) {
     console.log(chalk.bold('\nEnvironment Info:'));
     return envinfo
-        .run(
-            {
-                System: ['OS', 'CPU'],
-                Binaries: ['Node', 'npm', 'Yarn'],
-                Browsers: ['Chrome', 'Edge', 'Internet Explorer', 'Firefox', 'Safari'],
-                npmPackages: ['react', 'react-dom', 'react-scripts'],
-                npmGlobalPackages: ['create-react-app'],
-            },
-            {
-                duplicates: true,
-                showNotFound: true,
-            }
-        )
+        .run({
+            System: ['OS', 'CPU'],
+            Binaries: ['Node', 'npm', 'Yarn'],
+            Browsers: ['Chrome', 'Edge', 'Internet Explorer', 'Firefox', 'Safari'],
+            npmPackages: ['react', 'react-dom', 'react-scripts'],
+            npmGlobalPackages: ['create-react-app'],
+        }, {
+            duplicates: true,
+            showNotFound: true,
+        })
         .then(console.log);
 }
 
@@ -214,7 +211,7 @@ function createApp(
     );
 }
 
-function install(root, dependencies, verbose) {
+function install(root, dependencies, verbose, isDevDependencies) {
     return new Promise((resolve, reject) => {
         let command;
         let args;
@@ -234,7 +231,14 @@ function install(root, dependencies, verbose) {
             args.push('--verbose');
         }
 
-        const child = spawn(command, args, { stdio: 'inherit' });
+        if (isDevDependencies) {
+            const [_, save, ...other] = args;
+            args = [_, '--save-dev', ...other];
+        }
+
+        const child = spawn(command, args, {
+            stdio: 'inherit'
+        });
         child.on('close', code => {
             if (code !== 0) {
                 reject({
@@ -259,13 +263,66 @@ function run(
     const allDependencies = ['preact', packageToInstall];
     allDependencies.push(
         '@types/node',
-        'typescript'
+        'typescript',
+        '@playkit-js-contrib/common',
+        "@playkit-js-contrib/linkify",
+        "@playkit-js-contrib/plugin",
+        "@playkit-js-contrib/push-notifications",
+        "@playkit-js-contrib/ui",
+        "@types/classnames",
+        "classnames",
+        "preact",
+        "svg-url-loader",
+        path.resolve(__dirname + "/libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz"),
     );
+
+    const devDependencies = [
+        "@commitlint/cli",
+        "@commitlint/config-conventional",
+        "@typescript-eslint/eslint-plugin",
+        "@typescript-eslint/parser",
+        "awesome-typescript-loader",
+        "chalk",
+        "clean-webpack-plugin",
+        "copy-webpack-plugin",
+        "css-loader",
+        "eslint",
+        "eslint-config-prettier",
+        "eslint-plugin-filenames",
+        "eslint-plugin-import",
+        "eslint-plugin-node",
+        "eslint-plugin-prettier",
+        "eslint-plugin-promise",
+        "eslint-plugin-react",
+        "eslint-plugin-standard",
+        "fs-extra",
+        "html-webpack-plugin",
+        "husky",
+        "inquirer",
+        "lint-staged",
+        "node-sass",
+        "prettier",
+        "sass-loader",
+        "source-map-loader",
+        "standard-version",
+        "style-loader",
+        "tslint",
+        "tslint-config-prettier",
+        "tslint-consistent-codestyle",
+        "tslint-eslint-rules",
+        "tslint-react",
+        "typescript",
+        "webpack",
+        "webpack-cli",
+        "webpack-dev-server",
+        "webpack-merge",
+    ];
 
     console.log('Installing packages. This might take a couple of minutes.');
     getPackageName(packageToInstall)
-        .then(packageName =>({packageName: packageName})
-        )
+        .then(packageName => ({
+            packageName: packageName
+        }))
         .then(info => {
             const packageName = info.packageName;
             console.log(
@@ -274,10 +331,17 @@ function run(
             console.log();
 
             return install(
-                root,
-                allDependencies,
-                verbose,
-            ).then(() => packageName);
+                    root,
+                    allDependencies,
+                    verbose,
+                )
+                .then(() => install(
+                    root,
+                    devDependencies,
+                    verbose,
+                    true,
+                ))
+                .then(() => packageName);
         })
         .then(async packageName => {
             checkNodeVersion(packageName);
@@ -287,8 +351,7 @@ function run(
 
             const nodeArgs = fs.existsSync(pnpPath) ? ['--require', pnpPath] : [];
 
-            await executeNodeScript(
-                {
+            await executeNodeScript({
                     cwd: process.cwd(),
                     args: nodeArgs,
                 },
@@ -372,7 +435,9 @@ function getTemporaryDirectory() {
     return new Promise((resolve, reject) => {
         // Unsafe cleanup lets us recursively delete the directory if it contains
         // contents; by default it only allows removal if it's empty
-        tmp.dir({ unsafeCleanup: true }, (err, tmpdir, callback) => {
+        tmp.dir({
+            unsafeCleanup: true
+        }, (err, tmpdir, callback) => {
             if (err) {
                 reject(err);
             } else {
@@ -682,6 +747,7 @@ function getProxy() {
         }
     }
 }
+
 function checkThatNpmCanReadCwd() {
     const cwd = process.cwd();
     let childOutput = null;
@@ -744,12 +810,17 @@ function checkThatNpmCanReadCwd() {
 }
 
 
-function executeNodeScript({ cwd, args }, data, source) {
+function executeNodeScript({
+    cwd,
+    args
+}, data, source) {
     return new Promise((resolve, reject) => {
         const child = spawn(
             process.execPath,
-            [...args, '-e', source, '--', JSON.stringify(data)],
-            { cwd, stdio: 'inherit' }
+            [...args, '-e', source, '--', JSON.stringify(data)], {
+                cwd,
+                stdio: 'inherit'
+            }
         );
 
         child.on('close', code => {
