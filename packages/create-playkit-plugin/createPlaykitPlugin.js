@@ -134,7 +134,7 @@ if (program.info) {
 }
 
 async function askProjectOptions() {
-    const validation = (pattern = /^[a-zA-Z0-9-]*$/g) => input => {
+    const validation = (pattern = /^[a-zA-Z-]*$/g) => input => {
         if (!input) {
             return "This field should not be empty.";
         }
@@ -144,6 +144,11 @@ async function askProjectOptions() {
         }
 
         return true;
+    };
+
+    const onCancel = prompt => {
+        console.log(`${chalk.red('Canceled!')}`);
+        process.exit(1);
     };
 
     if (projectName) {
@@ -163,16 +168,18 @@ async function askProjectOptions() {
         type: "text",
         name: "npmName",
         message: "Please specify the plugin NPM name:",
-        validate: validation(/^(@[a-z-]+\/[a-z-]+|[a-z-]+)*$/g),
+        validate: validation(/^(@[a-z-]+\/[a-z-]+|[a-z-]+)$/g),
         initial: `@playkit-js/${name}-plugin`,
+        required: true,
     });
 
     const askGithubRepo = name => ({
         type: "text",
         name: "githubRepo",
         message: `Please specify the plugin GitHub repository:`,
-        validate: validation(/^([a-z-]+\/[a-z-]+|[a-z-]+)*$/g),
+        validate: validation(/^([a-z-]+\/[a-z-]+|[a-z-]+)$/g),
         initial: `kaltura/playkit-js-${name}`,
+        required: true,
     });
 
     const askDestination = (name) => ({
@@ -180,26 +187,27 @@ async function askProjectOptions() {
         name: "destination",
         message: `Please specify the destination folder where the plugin will be initialized:`,
         initial: projectDestination || `${process.cwd()}/playkit-js-${name}`,
+        required: true,
     });
 
     const {
         name
-    } = await prompts(askName);
+    } = await prompts(askName, {onCancel});
     projectName = name;
 
     const {
         npmName
-    } = await prompts(askNpmName(projectName));
+    } = await prompts(askNpmName(projectName), {onCancel});
     projectNpmName = npmName;
 
     const {
         githubRepo
-    } = await prompts(askGithubRepo(projectName));
+    } = await prompts(askGithubRepo(projectName), {onCancel});
     projectGitRepo = githubRepo;
 
     const {
         destination
-    } = await prompts(askDestination(projectName));
+    } = await prompts(askDestination(projectName), {onCancel});
     projectDestination = destination;
 }
 
