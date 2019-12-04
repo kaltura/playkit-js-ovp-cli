@@ -49,13 +49,10 @@ const program = new commander.Command(packageJson.name)
                 const [_, playkitPackage] = dependency.split(`${VARIABLES.CONTRIB}/`);
 
                 return playkitPackage ? [...forInstall, playkitPackage] : forInstall;
-            }, []).join(',');
+            }, [])
+            .map(packageName => `@playkit-js-contrib/${packageName}${contribLink}`);
 
-        const packagesUrl = `@playkit-js-contrib/{${packages}}${contribLink}`;
-
-        console.log(':::', packagesUrl);
-
-        const child = spawn('npm', [installStrategy, packagesUrl], {
+        const child = spawn('npm', [installStrategy, ...packages], {
             stdio: 'inherit'
         });
 
