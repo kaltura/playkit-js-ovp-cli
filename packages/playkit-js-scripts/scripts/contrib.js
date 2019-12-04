@@ -1,4 +1,5 @@
 const commander = require('commander');
+const path = require('path');
 const spawn = require('cross-spawn');
 const packageJson = require('../package.json');
 const VARIABLES = require('../config/variables.config');
@@ -25,7 +26,7 @@ const program = new commander.Command(packageJson.name)
         let contribLink = null;
 
 
-        switch (type) {
+        switch (program.type) {
             case contribTypes.LATEST:
                 contribLink = '@latest';
                 break;
@@ -45,11 +46,16 @@ const program = new commander.Command(packageJson.name)
 
         const packages = Object.keys(appPackage.dependencies)
             .reduce((forInstall, dependency) => {
-                const [_, playkitPackage] = dependency.split(VARIABLES.CONTRIB);
-                return [...forInstall, ...(playkitPackage || []) ];
+                const [_, playkitPackage] = dependency.split(`${VARIABLES.CONTRIB}/`);
+
+                return playkitPackage ? [...forInstall, playkitPackage] : forInstall;
             }, []).join(',');
 
-        const child = spawn('npm', [installStrategy, `@playkit-js-contrib/{${packages}}${contribLink}`], {
+        const packagesUrl = `@playkit-js-contrib/{${packages}}${contribLink}`;
+
+        console.log(':::', packagesUrl);
+
+        const child = spawn('npm', [installStrategy, packagesUrl], {
             stdio: 'inherit'
         });
 
