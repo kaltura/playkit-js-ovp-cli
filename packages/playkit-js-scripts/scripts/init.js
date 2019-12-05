@@ -107,9 +107,6 @@ module.exports = function (
         "serve": "webpack-dev-server --open --config webpack.dev.js",
         "serve:external": "npm run serve -- --host 0.0.0.0",
         "analyze": "npm run build && npx source-map-explorer dist/playkit-js-qna.js",
-        // "contrib:latest": "npm i @playkit-js-contrib/{push-notifications,common,ui,plugin,linkify}@latest",
-        // "contrib:next": "npm i @playkit-js-contrib/{push-notifications,common,ui,plugin,linkify}@next",
-        // "contrib:local": "npm link @playkit-js-contrib/{push-notifications,common,ui,plugin,linkify} --production",
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
         "husky:pre-commit": "lint-staged",
@@ -119,9 +116,9 @@ module.exports = function (
         "deploy:next:publish-to-npm": "node scripts/deploy-publish.js",
         "deploy:next:prepare": "node scripts/deploy-prepare.js --prerelease next",
 
-        "contrib:latest": 'playkit-js-scripts contrib --type=latest',
-        "contrib:next": 'playkit-js-scripts contrib --type=next',
-        "contrib:local": 'playkit-js-scripts contrib --type=local',
+        "contrib:latest": 'kcontrib contrib --type=latest',
+        "contrib:next": 'kcontrib contrib --type=next',
+        "contrib:local": 'kcontrib contrib --type=local',
 
         // "start": 'playkit-js-scripts start',
         // "start:v7": 'playkit-js-scripts start-v7',
