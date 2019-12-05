@@ -14,7 +14,7 @@ const contribTypes = {
 const program = new commander.Command(packageJson.name)
     .version(packageJson.version)
     .option(
-        '--type <update-type>',
+        '--type {latest|next|local}',
         'choose a type of the contrib script'
     )
     .parse(process.argv);
