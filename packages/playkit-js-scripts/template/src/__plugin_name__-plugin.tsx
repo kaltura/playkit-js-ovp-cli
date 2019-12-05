@@ -45,18 +45,18 @@ export type DisplayToast = (options: {
   severity: ToastSeverity;
 }) => void;
 
-const pluginName = `plugin_name`;
+const pluginName = `__plugin_name__`;
 const DefaultBannerDuration: number = 60 * 1000;
 const DefaultToastDuration: number = 5 * 1000;
 const MinBannerDuration: number = 5 * 1000;
 const MinToastDuration: number = 5 * 1000;
 
 const logger = getContribLogger({
-  class: "Plugin_NamePlugin",
-  module: "plugin_name-plugin"
+  class: "__Plugin_Name__Plugin",
+  module: "__plugin_name__-plugin"
 });
 
-interface Plugin_NamePluginConfig {
+interface __Plugin_Name__PluginConfig {
   bannerDuration: number;
   toastDuration: number;
   dateFormat: string;
@@ -80,7 +80,7 @@ enum UserRole {
 
 const DefaultAnonymousPrefix = 'Guest';
 
-export class Plugin_NamePlugin implements OnMediaLoad, OnPluginSetup, OnMediaUnload {
+export class __Plugin_Name__Plugin implements OnMediaLoad, OnPluginSetup, OnMediaUnload {
   private _kitchenSinkItem: KitchenSinkItem | null = null;
   private _threads: QnaMessage[] | [] = [];
   private _hasError: boolean = false;
@@ -104,7 +104,7 @@ export class Plugin_NamePlugin implements OnMediaLoad, OnPluginSetup, OnMediaUnl
   constructor(
     private _corePlugin: CorePlugin,
     private _contribServices: ContribServices,
-    private _configs: ContribPluginConfigs<Plugin_NamePluginConfig>
+    private _configs: ContribPluginConfigs<__Plugin_Name__PluginConfig>
   ) {
     let bannerDuration =
       this._corePlugin.config.bannerDuration &&
@@ -288,7 +288,7 @@ export class Plugin_NamePlugin implements OnMediaLoad, OnPluginSetup, OnMediaUnl
     setTimeout(() => {
       this._loading = false;
       this._updateKitchenSink();
-    }, Plugin_NamePlugin.LOADING_TIME_END);
+    }, __Plugin_Name__Plugin.LOADING_TIME_END);
   }
 
   private _updateKitchenSink() {
@@ -434,9 +434,9 @@ export class Plugin_NamePlugin implements OnMediaLoad, OnPluginSetup, OnMediaUnl
 }
 
 ContribPluginManager.registerPlugin(
-  "plugin_name",
-  (data: ContribPluginData<Plugin_NamePluginConfig>) => {
-    return new Plugin_NamePlugin(data.corePlugin, data.contribServices, data.configs);
+  "__plugin_name__",
+  (data: ContribPluginData<__Plugin_Name__PluginConfig>) => {
+    return new __Plugin_Name__Plugin(data.corePlugin, data.contribServices, data.configs);
   },
   {
     defaultConfig: {

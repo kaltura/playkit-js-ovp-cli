@@ -1,1 +1,1 @@
-import "./plugin_name-plugin";
+import "./__plugin_name__-plugin";
