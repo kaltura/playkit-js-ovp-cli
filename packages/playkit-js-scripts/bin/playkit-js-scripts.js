@@ -29,6 +29,7 @@ switch (script) {
     case 'build-v7':
     case 'eject':
     case 'contrib':
+    case 'tests-serve':
     case 'start-v2':
     case 'start-v7':
     case 'test': {
