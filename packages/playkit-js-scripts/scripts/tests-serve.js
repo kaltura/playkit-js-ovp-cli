@@ -3,6 +3,7 @@ const path = require('path');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const prompts = require('prompts');
+const os = require('os');
 
 const modes = {
     userType: ['annonymous', 'widgetId', 'ks'],
@@ -44,20 +45,28 @@ async function modeSelection() {
     }
 
     if (!isFilesExist) {
-        const result = await modeSelection();
-        // createConfigFiles(appTestFolder);
+        const modes = await modeSelection();
+        createConfigFiles(appTestFolder, modes);
     }
 })();
 
-function createConfigFiles(appTestFolder) {
+function createConfigFiles(appTestFolder, modes) {
     const configFilePath = path.resolve(__dirname, '../config/config.json');
-    const envFilePath = path.resolve(__dirname, '../config/env.json');
+    const readmeFilePath = path.resolve(__dirname, '../config/readme.md');
+    const envFile = require(path.resolve(__dirname, '../config/env.json'));
 
-    [configFilePath, envFilePath].map(file => fs.copyFile(file, `${appTestFolder}/${path.basename(file)}`,
-        (error) => error
-            ? console.error('Error while file transferring: ', error)
-            : console.log(`Config file ${path.basename(file)} was transferred successful.`)
-    ));
+    envFile.modes = modes;
+
+    fs.writeFileSync(
+        path.join(appTestFolder, 'env.json'),
+        JSON.stringify(envFile, null, 2) + os.EOL
+    );
+
+    [readmeFilePath, configFilePath].forEach(file => fs.copyFileSync(file, `${appTestFolder}/${path.basename(file)}`));
+
+    console.log(`Config files were created successfully.
+    For more info read the Readme at test/readme.md
+    `);
 }
 
 

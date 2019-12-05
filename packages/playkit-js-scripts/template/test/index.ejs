@@ -37,6 +37,20 @@
 
     -->
 
+    <script>
+        function loadJSON(path, callback) {
+            const xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', path, true);
+            xobj.onreadystatechange = function () {
+                if (xobj.readyState === 4 && xobj.status.toString() === "200") {
+                    callback(xobj.responseText);
+                }
+            };
+            xobj.send(null);
+        }
+    </script>
+
     <!-- Using specific version of player until core player will include infrastructure needed by VAMB plugins -->
     <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.48.0-vamb.1"></script>
 
