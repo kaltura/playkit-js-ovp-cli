@@ -2,6 +2,33 @@ const commander = require('commander');
 const path = require('path');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
+const prompts = require('prompts');
+
+const modes = {
+    userType: ['annonymous', 'widgetId', 'ks'],
+    bundler: ['custom', 'uiconf'],
+    serverEnv: ['qa', 'production'],
+    bundlerEnv: ['qa', 'production'],
+};
+
+const modesTypes = Object.keys(modes);
+
+async function modeSelection() {
+    const onCancel = prompt => {
+        console.log(`${chalk.red('Canceled!')}`);
+        process.exit(1);
+    };
+
+    const chooseModes = modesTypes.map(mode => ({
+        type: "select",
+        name: mode,
+        message: `Choose ${mode}:`,
+        choices: modes[mode].map(value => ({title: value, value})),
+        initial: 0,
+    }));
+
+    return await prompts(chooseModes, {onCancel});
+}
 
 (async () => {
     const appPath = process.cwd();
@@ -16,8 +43,9 @@ const fs = require('fs-extra');
         console.error('Error while reading files paths.');
     }
 
-    if(!isFilesExist) {
-        createConfigFiles(appTestFolder);
+    if (!isFilesExist) {
+        const result = await modeSelection();
+        // createConfigFiles(appTestFolder);
     }
 })();
 
@@ -31,3 +59,5 @@ function createConfigFiles(appTestFolder) {
             : console.log(`Config file ${path.basename(file)} was transferred successful.`)
     ));
 }
+
+
