@@ -42,6 +42,7 @@ const url = require('url');
 const hyperquest = require('hyperquest');
 const envinfo = require('envinfo');
 const os = require('os');
+const prompts = require("prompts");
 
 const packageJson = require('./package.json');
 
@@ -54,6 +55,9 @@ const errorLogFilePatterns = [
 ];
 
 let projectName;
+let projectNpmName;
+let projectGitRepo;
+let projectDestination;
 
 const program = new commander.Command(packageJson.name)
     .version(packageJson.version)
@@ -129,19 +133,82 @@ if (program.info) {
         .then(console.log);
 }
 
-if (typeof projectName === 'undefined') {
-    console.error('Please specify the project directory:');
-    console.log(
-        `  ${chalk.cyan(program.name())} ${chalk.green('<project-directory>')}`
-    );
-    console.log();
-    console.log('For example:');
-    console.log(`  ${chalk.cyan(program.name())} ${chalk.green('my-react-app')}`);
-    console.log();
-    console.log(
-        `Run ${chalk.cyan(`${program.name()} --help`)} to see all options.`
-    );
-    process.exit(1);
+async function askProjectOptions() {
+    const validation = (pattern = /^[a-zA-Z-]*$/g) => input => {
+        if (!input) {
+            return "This field should not be empty.";
+        }
+
+        if (!pattern.test(input)) {
+            return "It is not valid! Please try again.";
+        }
+
+        return true;
+    };
+
+    const onCancel = prompt => {
+        console.log(`${chalk.red('Canceled!')}`);
+        process.exit(1);
+    };
+
+    if (projectName) {
+        projectDestination = path.resolve(projectName);
+        projectName = path.basename(projectDestination);
+    }
+
+    const askName = {
+        type: "text",
+        name: "name",
+        message: `Please specify the project name:`,
+        validate: validation(),
+        initial: projectName,
+    };
+
+    const askNpmName = name => ({
+        type: "text",
+        name: "npmName",
+        message: "Please specify the plugin NPM name:",
+        validate: validation(/^(@[a-z-]+\/[a-z-]+|[a-z-]+)$/g),
+        initial: `@playkit-js/${name}-plugin`,
+        required: true,
+    });
+
+    const askGithubRepo = name => ({
+        type: "text",
+        name: "githubRepo",
+        message: `Please specify the plugin GitHub repository:`,
+        validate: validation(/^([a-z-]+\/[a-z-]+|[a-z-]+)$/g),
+        initial: `kaltura/playkit-js-${name}`,
+        required: true,
+    });
+
+    const askDestination = (name) => ({
+        type: "text",
+        name: "destination",
+        message: `Please specify the destination folder where the plugin will be initialized:`,
+        initial: projectDestination || `${process.cwd()}/playkit-js-${name}`,
+        required: true,
+    });
+
+    const {
+        name
+    } = await prompts(askName, {onCancel});
+    projectName = name;
+
+    const {
+        npmName
+    } = await prompts(askNpmName(projectName), {onCancel});
+    projectNpmName = npmName;
+
+    const {
+        githubRepo
+    } = await prompts(askGithubRepo(projectName), {onCancel});
+    projectGitRepo = githubRepo;
+
+    const {
+        destination
+    } = await prompts(askDestination(projectName), {onCancel});
+    projectDestination = destination;
 }
 
 function printValidationResults(results) {
@@ -152,20 +219,24 @@ function printValidationResults(results) {
     }
 }
 
-const hiddenProgram = new commander.Command()
-    .option(
-        '--internal-testing-template <path-to-template>',
-        '(internal usage only, DO NOT RELY ON THIS) ' +
-        'use a non-standard application template'
-    )
-    .parse(process.argv);
+(async () => {
+    await askProjectOptions();
 
-createApp(
-    projectName,
-    program.verbose,
-    program.scriptsVersion,
-    hiddenProgram.internalTestingTemplate
-);
+    const hiddenProgram = new commander.Command()
+        .option(
+            '--internal-testing-template <path-to-template>',
+            '(internal usage only, DO NOT RELY ON THIS) ' +
+            'use a non-standard application template'
+        )
+        .parse(process.argv);
+
+    createApp(
+        projectName,
+        program.verbose,
+        program.scriptsVersion,
+        hiddenProgram.internalTestingTemplate
+    );
+})()
 
 function createApp(
     name,
@@ -173,37 +244,44 @@ function createApp(
     version,
     template
 ) {
-    const root = path.resolve(name);
-    const appName = path.basename(root);
+    const folderName = path.basename(projectDestination);
 
-    checkAppName(appName);
-    fs.ensureDirSync(name);
-    if (!isSafeToCreateProjectIn(root, name)) {
+    checkAppName(folderName);
+    fs.ensureDirSync(projectDestination);
+    if (!isSafeToCreateProjectIn(projectDestination, folderName)) {
         process.exit(1);
     }
 
-    console.log(`Creating a new React app in ${chalk.green(root)}.`);
+    console.log(`Creating a new React app in ${chalk.green(projectDestination)}.`);
     console.log();
 
     const packageJson = {
-        name: "playkit-js-" + appName,
+        name: projectNpmName,
         version: '0.0.1',
         private: true,
+        bugs: {
+            url: `https://github.com/${projectGitRepo}/issues`
+        },
+        homepage: `https://github.com/${projectGitRepo}#readme`,
+        repository: {
+            type: "git",
+            url: `git+https://github.com/${projectGitRepo}.git`
+        },
     };
     fs.writeFileSync(
-        path.join(root, 'package.json'),
+        path.join(projectDestination, 'package.json'),
         JSON.stringify(packageJson, null, 2) + os.EOL
     );
 
     const originalDirectory = process.cwd();
-    process.chdir(root);
+    process.chdir(projectDestination);
     if (!checkThatNpmCanReadCwd()) {
         process.exit(1);
     }
 
     run(
-        root,
-        appName,
+        projectDestination,
+        folderName,
         version,
         verbose,
         originalDirectory,
@@ -411,24 +489,27 @@ function run(
 }
 
 function getInstallPackage(version, originalDirectory) {
-    let packageToInstall = 'react-scripts';
-    const validSemver = semver.valid(version);
-    if (validSemver) {
-        packageToInstall += `@${validSemver}`;
-    } else if (version) {
-        if (version[0] === '@' && version.indexOf('/') === -1) {
-            packageToInstall += version;
-        } else if (version.match(/^file:/)) {
-            packageToInstall = `file:${path.resolve(
-                originalDirectory,
-                version.match(/^file:(.*)?$/)[1]
-            )}`;
-        } else {
-            // for tar.gz or alternative paths
-            packageToInstall = version;
-        }
-    }
-    return packageToInstall;
+    // let packageToInstall = 'playkit-js-scripts';
+    // const validSemver = semver.valid(version);
+    // if (validSemver) {
+    //     packageToInstall += `@${validSemver}`;
+    // } else if (version) {
+    //     if (version[0] === '@' && version.indexOf('/') === -1) {
+    //         packageToInstall += version;
+    //     } else if (version.match(/^file:/)) {
+    //         packageToInstall = `file:${path.resolve(
+    //             originalDirectory,
+    //             version.match(/^file:(.*)?$/)[1]
+    //         )}`;
+    //     } else {
+    //         // for tar.gz or alternative paths
+    //         packageToInstall = version;
+    //     }
+    // }
+    return `file:${path.resolve(
+        __dirname,
+        '../playkit-js-scripts'
+    )}`;
 }
 
 function getTemporaryDirectory() {
