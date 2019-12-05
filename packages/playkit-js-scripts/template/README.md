@@ -1,4 +1,4 @@
-# Kaltura Player V7 - Plugin_Name plugin
+# Kaltura Player V7 - __Plugin_Name__ plugin
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
