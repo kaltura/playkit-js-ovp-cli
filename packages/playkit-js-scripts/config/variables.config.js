@@ -1,6 +1,6 @@
-const TEMPLATE = /plugin_name/i;
-const TEMPLATE_FOR_REPLACE_LOWERCASE = /plugin_name/g;
-const TEMPLATE_FOR_REPLACE_CAPITALCASE = /Plugin_Name/g;
+const TEMPLATE = /__plugin_name__/i;
+const TEMPLATE_FOR_REPLACE_LOWERCASE = /__plugin_name__/g;
+const TEMPLATE_FOR_REPLACE_CAPITALCASE = /__Plugin_Name__/g;
 
 module.exports = {
     TEMPLATE,
