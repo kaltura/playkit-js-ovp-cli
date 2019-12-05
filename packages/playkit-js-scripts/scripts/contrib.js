@@ -37,19 +37,23 @@ const program = new commander.Command(packageJson.name)
     const appPath = process.cwd();
     const appPackage = require(path.join(appPath, 'package.json'));
     let installStrategy = 'install';
-    let contribLink = null;
+    let INFO_MESSAGE = 'The following packages will be re-installed from npm with tag ';
+    let npmTag = null;
 
 
     switch (program.type) {
         case contribTypes.LATEST:
-            contribLink = '@latest';
+            npmTag = '@latest';
+            INFO_MESSAGE += contribTypes.LATEST + ':';
             break;
         case contribTypes.NEXT:
-            contribLink = '@next';
+            npmTag = '@next';
+            INFO_MESSAGE += contribTypes.NEXT + ':';
             break;
         case contribTypes.LOCAL:
             installStrategy = 'link';
-            contribLink = ' --production';
+            npmTag = '';
+            INFO_MESSAGE = 'The following packages will be linked to local libraries:';
             break;
     }
 
@@ -59,7 +63,15 @@ const program = new commander.Command(packageJson.name)
 
             return playkitPackage ? [...forInstall, playkitPackage] : forInstall;
         }, [])
-        .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${contribLink}`);
+        .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${npmTag}`);
+
+    console.log(
+        `The following packages will be linked to local libraries:\n`,
+        packages.map(packageName => `- ${packageName}\n`).join(''),
+        INFO_MESSAGE.includes(contribTypes.LOCAL)
+            ? `${chalk.bold('In case of error, you should run \`npm run setup\` in the contrib repository')}`
+            : '',
+    );
 
     const child = spawn('npm', [installStrategy, ...packages], {
         stdio: 'inherit'
