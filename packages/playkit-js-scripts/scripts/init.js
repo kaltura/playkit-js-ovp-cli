@@ -9,7 +9,8 @@ process.on('unhandledRejection', err => {
 const fs = require('fs-extra');
 const {
     walk,
-    ucfirst
+    ucfirst,
+    snakeToCamel
 } = require('../utils');
 const format = require("string-template");
 const compile = require("string-template/compile");
@@ -19,6 +20,7 @@ const walkSync = require('walk-sync');
 const execSync = require('child_process').execSync;
 const spawn = require('cross-spawn');
 const os = require('os');
+const VARIABLES = require('../config/variables.config');
 
 const defaultBrowsers = {
     production: ['>0.2%', 'not dead', 'not op_mini all'],
@@ -104,10 +106,18 @@ module.exports = function (
         "build:dev": "webpack --config webpack.dev.js",
         "serve": "webpack-dev-server --open --config webpack.dev.js",
         "serve:external": "npm run serve -- --host 0.0.0.0",
-        "analyze": "npm run build && npx source-map-explorer dist/playkit-js-transcript.js",
-        "contrib:latest": "npm i @playkit-js-contrib/{common,ui,plugin}@latest",
-        "contrib:next": "npm i @playkit-js-contrib/{common,ui,plugin}@next",
-        "contrib:local": "npm link @playkit-js-contrib/{common,ui,plugin} --production",
+        "analyze": "npm run build && npx source-map-explorer dist/playkit-js-qna.js",
+        "contrib:latest": "npm i @playkit-js-contrib/{push-notifications,common,ui,plugin,linkify}@latest",
+        "contrib:next": "npm i @playkit-js-contrib/{push-notifications,common,ui,plugin,linkify}@next",
+        "contrib:local": "npm link @playkit-js-contrib/{push-notifications,common,ui,plugin,linkify} --production",
+        "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
+        "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
+        "husky:pre-commit": "lint-staged",
+        "husky:commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+        "deploy:prepare": "node scripts/deploy-prepare.js",
+        "deploy:publish-to-npm": "node scripts/deploy-publish.js",
+        "deploy:next:publish-to-npm": "node scripts/deploy-publish.js",
+        "deploy:next:prepare": "node scripts/deploy-prepare.js --prerelease next",
 
         // "start": 'playkit-js-scripts start',
         // "start:v7": 'playkit-js-scripts start-v7',
@@ -200,7 +210,7 @@ module.exports = function (
         }
     }
 
-    // replaceTemplate(appPath, appName);
+    replaceTemplate(appPath, appName);
 
     // installSubPackages(appPath);
 
@@ -262,15 +272,24 @@ function replaceTemplate(appPath, appName) {
         .filter(file => fs.statSync(file).isFile())
         .forEach(file => {
             const content = fs.readFileSync(file, 'utf8');
-            if (!content) {
-                return;
+            const filename = path.basename(file);
+            const hasTemplateInContent = content ? VARIABLES.TEMPLATE.test(content) : false;
+            const hasTemplateInFilename = VARIABLES.TEMPLATE.test(filename);
+            const camelCase = snakeToCamel(appName);
+            const upperCaseAppName = ucfirst(camelCase);
+            const replace = str => str
+                .replace(VARIABLES.TEMPLATE_FOR_REPLACE_LOWERCASE, appName)
+                .replace(VARIABLES.TEMPLATE_FOR_REPLACE_CAPITALCASE, upperCaseAppName);
+
+            if (hasTemplateInContent) {
+                const result = replace(content);
+                fs.writeFileSync(file, result, 'utf8');
             }
-            const className = ucfirst(appName) + "Plugin";
-            let template = compile(content);
-            fs.writeFileSync(file, template({
-                className,
-                pluginName: appName
-            }));
+
+            if (hasTemplateInFilename) {
+                const pathToFile = path.dirname(file);
+                fs.renameSync(file, `${pathToFile}/${replace(filename)}`);
+            }
         });
 }
 
