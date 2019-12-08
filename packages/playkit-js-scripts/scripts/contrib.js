@@ -14,7 +14,7 @@ const contribTypes = {
 const program = new commander.Command(packageJson.name)
     .version(packageJson.version)
     .option(
-        '--type {latest|next|local}',
+        '--type <latest|next|local>',
         'choose a type of the contrib script'
     )
     .parse(process.argv);
@@ -22,6 +22,7 @@ const program = new commander.Command(packageJson.name)
 (async () => {
     const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
+    console.log(`sakal ${program.type} ${process.argv}`);
     if (!program.type || !contribTypesValues.includes(program.type)) {
         return console.error(`
         ${chalk.red('Please, provide the correct type parameter for the contrib script.')}
@@ -30,25 +31,23 @@ const program = new commander.Command(packageJson.name)
                 - ${contribTypes.NEXT}
                 - ${contribTypes.LOCAL}
                 
-            For example:> kcontrib contrib --type=local
+            For example: kcontrib contrib --type=local
     `);
     }
 
     const appPath = process.cwd();
     const appPackage = require(path.join(appPath, 'package.json'));
     let installStrategy = 'install';
-    let INFO_MESSAGE = 'The following packages will be re-installed from npm with tag ';
     let npmTag = null;
 
 
     switch (program.type) {
         case contribTypes.LATEST:
             npmTag = '@latest';
-            INFO_MESSAGE += contribTypes.LATEST + ':';
             break;
         case contribTypes.NEXT:
             npmTag = '@next';
-            INFO_MESSAGE += contribTypes.NEXT + ':';
+            INFO_MESSAGE = `${INFO_MESSAGE}@${contribTypes.NEXT}:`;
             break;
         case contribTypes.LOCAL:
             installStrategy = 'link';
@@ -65,13 +64,17 @@ const program = new commander.Command(packageJson.name)
         }, [])
         .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${npmTag}`);
 
-    console.log(
-        `${INFO_MESSAGE}\n`,
-        packages.map(packageName => `- ${packageName}\n`).join(''),
-        INFO_MESSAGE.includes(contribTypes.LOCAL)
-            ? `${chalk.bold('In case of error, you should run \`npm run setup\` in the contrib repository')}`
-            : '',
-    );
+    const packagesSummary = packages.map(packageName => `- ${packageName}\n`).join('');
+
+    if (program.type === contribTypes.LOCAL) {
+        console.log(chalk` {blue.bold The following packages will be linked to local libraries:}
+${packagesSummary}
+{blue In case of error, you should run 'npm run setup' in the contrib repository.}
+`);
+    } else {
+        console.log(chalk` {blue.bold The following packages will be re-installed from npm:}
+${packagesSummary}`);
+    }
 
     const child = spawn('npm', [installStrategy, ...packages], {
         stdio: 'inherit'
