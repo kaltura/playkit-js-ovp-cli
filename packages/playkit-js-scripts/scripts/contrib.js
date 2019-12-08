@@ -66,7 +66,7 @@ const program = new commander.Command(packageJson.name)
         .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${npmTag}`);
 
     console.log(
-        `The following packages will be linked to local libraries:\n`,
+        `${INFO_MESSAGE}\n`,
         packages.map(packageName => `- ${packageName}\n`).join(''),
         INFO_MESSAGE.includes(contribTypes.LOCAL)
             ? `${chalk.bold('In case of error, you should run \`npm run setup\` in the contrib repository')}`
