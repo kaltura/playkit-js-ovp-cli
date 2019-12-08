@@ -47,12 +47,10 @@ const program = new commander.Command(packageJson.name)
             break;
         case contribTypes.NEXT:
             npmTag = '@next';
-            INFO_MESSAGE = `${INFO_MESSAGE}@${contribTypes.NEXT}:`;
             break;
         case contribTypes.LOCAL:
             installStrategy = 'link';
             npmTag = '';
-            INFO_MESSAGE = 'The following packages will be linked to local libraries:';
             break;
     }
 
