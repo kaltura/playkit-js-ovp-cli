@@ -1,5 +1,5 @@
 {
-  "name": "playkit-js-scripts",
+  "name": "kcontrib",
   "version": "0.0.1",
   "description": "Configuration and scripts for Create Playkit Plugin.",
   "repository": "omridevk/playkit-js-ovp",
@@ -18,7 +18,7 @@
     "utils"
   ],
   "bin": {
-    "playkit-js-scripts": "./bin/playkit-js-scripts.js"
+    "kcontrib": "./bin/kcontrib.js"
   },
   "dependencies": {
     "@babel/core": "7.3.4",
@@ -32,6 +32,7 @@
     "babel-plugin-named-asset-import": "^0.3.1",
     "babel-preset-react-app": "^7.0.2",
     "case-sensitive-paths-webpack-plugin": "2.2.0",
+    "commander": "^4.0.1",
     "copy-webpack-plugin": "^5.0.2",
     "cross-spawn": "6.0.5",
     "css-loader": "2.1.1",
