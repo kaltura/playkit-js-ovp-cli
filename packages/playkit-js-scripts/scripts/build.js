@@ -13,11 +13,12 @@ process.on('unhandledRejection', err => {
 });
 
 const path = require('path');
+const { appOverrideWebpack, appPath } = require('../config/paths');
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const webpack = require('webpack');
-const configDev = require('../new-config/webpack.dev');
-const configProd = require('../new-config/webpack.prod');
+const configDev = require('../config/webpack.dev');
+const configProd = require('../config/webpack.prod');
 const commander = require('commander');
 let config = null;
 
@@ -37,6 +38,12 @@ if (program.dev) {
     config = configProd;
     process.env.BABEL_ENV = buildEnv.PRODUCTION;
     process.env.NODE_ENV = buildEnv.PRODUCTION;
+}
+
+if (fs.existsSync(appOverrideWebpack)) {
+    const overrideWebpack = require(appOverrideWebpack);
+    config = overrideWebpack(config);
+    console.log(chalk.blue(`Using webpack config from ${path.relative(appPath, appOverrideWebpack)}.\n`));
 }
 
 build().then(({ stats, warnings }) => {
