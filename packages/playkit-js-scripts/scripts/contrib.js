@@ -14,7 +14,7 @@ const contribTypes = {
 const program = new commander.Command(packageJson.name)
     .version(packageJson.version)
     .option(
-        '--type <update-type>',
+        '--type <latest|next|local>',
         'choose a type of the contrib script'
     )
     .parse(process.argv);
@@ -22,6 +22,7 @@ const program = new commander.Command(packageJson.name)
 (async () => {
     const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
+    console.log(`sakal ${program.type} ${process.argv}`);
     if (!program.type || !contribTypesValues.includes(program.type)) {
         return console.error(`
         ${chalk.red('Please, provide the correct type parameter for the contrib script.')}
@@ -30,26 +31,26 @@ const program = new commander.Command(packageJson.name)
                 - ${contribTypes.NEXT}
                 - ${contribTypes.LOCAL}
                 
-            For example:> kcontrib contrib --type=local
+            For example: kcontrib contrib --type=local
     `);
     }
 
     const appPath = process.cwd();
     const appPackage = require(path.join(appPath, 'package.json'));
     let installStrategy = 'install';
-    let contribLink = null;
+    let npmTag = null;
 
 
     switch (program.type) {
         case contribTypes.LATEST:
-            contribLink = '@latest';
+            npmTag = '@latest';
             break;
         case contribTypes.NEXT:
-            contribLink = '@next';
+            npmTag = '@next';
             break;
         case contribTypes.LOCAL:
             installStrategy = 'link';
-            contribLink = ' --production';
+            npmTag = '';
             break;
     }
 
@@ -59,7 +60,19 @@ const program = new commander.Command(packageJson.name)
 
             return playkitPackage ? [...forInstall, playkitPackage] : forInstall;
         }, [])
-        .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${contribLink}`);
+        .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${npmTag}`);
+
+    const packagesSummary = packages.map(packageName => `- ${packageName}\n`).join('');
+
+    if (program.type === contribTypes.LOCAL) {
+        console.log(chalk` {blue.bold The following packages will be linked to local libraries:}
+${packagesSummary}
+{blue In case of error, you should run 'npm run setup' in the contrib repository.}
+`);
+    } else {
+        console.log(chalk` {blue.bold The following packages will be re-installed from npm:}
+${packagesSummary}`);
+    }
 
     const child = spawn('npm', [installStrategy, ...packages], {
         stdio: 'inherit'

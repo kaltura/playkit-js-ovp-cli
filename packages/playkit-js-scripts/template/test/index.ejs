@@ -2,40 +2,9 @@
 <html>
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>__Plugin_Name__ plugin for player V7 - Test page</title>
-
-
-    <!--
-        Step 1: Choose how to fetch the player
-
-        Note:
-        - You can use any version that exists in the QA bundler.
-        - You can still stream entries from production.
-        - Partner 6560 in QA was created specially for the development of player v7 VAMB plugins.
-        - Feel free to add entries and enable features, avoid altering existing entries.
-
-        For latest version:
-        -------------------
-        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252"></script>
-
-
-        Specific player version:
-        -------------------
-        - replace {version-number} with valid version in QA server (like 0.47.8-vamb.1)
-
-        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player={version-number}"></script>
-
-
-        Test integration with additional plugins:
-        -------------------------------------------
-        - Replace {list-of-plugins-separated-with-comma} with list of plugins (like qna=4.0.1,transcript=1.0.0)
-        - Avoid listing this repo plugin otherwise it will cause duplication.
-
-        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/{list-of-plugins-separated-with-comma}"></script>
-
-    -->
 
     <script>
         function loadJSON(path, callback) {
@@ -49,37 +18,48 @@
             };
             xobj.send(null);
         }
+
+        function loadScript(url, callback) {
+            let script = document.createElement("script")
+            script.type = "text/javascript";
+            if (script.readyState) {
+                script.onreadystatechange = function () {
+                    if (script.readyState === "loaded" || script.readyState === "complete") {
+                        script.onreadystatechange = null;
+                        callback();
+                    }
+                };
+            } else {
+                script.onload = function () {
+                    callback();
+                };
+            }
+
+            script.src = url;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        }
     </script>
 
-    <!-- Using specific version of player until core player will include infrastructure needed by VAMB plugins -->
-    <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.48.0-vamb.1"></script>
-
     <script>
-        // Step 2: configure the player with relevant information
+        function fetchConfigs(callback) {
+            loadJSON('./env.json', (envJson) => loadJSON('./config.json', (configJson) => {
+                const [envOptions, configOptions] = [envJson, configJson].map(conf => JSON.parse(conf));
+                const env = envOptions.env[envOptions.modes.bundlerEnv];
 
-        const partnerId = "6560"; // 6560 = partner in QA dedicated for plugins test page
-        const uiConfId = "15224252"; // 15224252 = uiConf of 6560 in QA dedicated for plugins test page
-        const ks = "";
-        const userId = ""; // usually optional, mandatory for webcast plugins (ie Shimi)
-        const entryId = "0_dbwcaqfq"; // 0_dbwcaqfq = sample entry of 6560 in QA
-        const switchMediaEntryId = ""; // optional
+                const bundlerUrl = env.bundler + '/p/' + configOptions.data.partnerId + '/embedPlaykitJs/uiconf_id/' + configOptions.data.uiConfId +
+                    (envOptions.modes.bundler === "uiConf"
+                        ? ''
+                        : '/versions/kaltura-ovp-player=' + envOptions.bundler.customPlayerVersion);
 
-        // Step 3: choose which environment to use at runtime (qa / production)
-        // qa server
-        // Step 3: choose which environment to use at runtime (qa / production)
-        // qa server
-        let env = {
-            serviceUrl:"https://qa-apache-php7.dev.kaltura.com/api_v3",
-            cdnUrl: "https://qa-nginx-vod.dev.kaltura.com"
-        };
+                let loaderRunner = () => callback(env, configOptions);
+                <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
+                loaderRunner = ((prevLoader) => () => loadScript("<%= htmlWebpackPlugin.files.chunks[chunk].entry %>", prevLoader))(loaderRunner);
+                <% } %>
+                loadScript(bundlerUrl, loaderRunner);
+            }))
+        }
 
-        // uncomment this to use production
-        // env = {
-        //     serviceUrl:"https://cdnapisec.kaltura.com/api_v3",
-        //     cdnUrl: "https://cfvod.kaltura.com"
-        // };
-
-        // Step 4: configure relevant plugins
+        // Configuring relevant plugins
         const plugins = {
             '__plugin_name__': {
                 dateFormat: 'mmmm do, yyyy',
@@ -89,7 +69,7 @@
             }
         };
 
-        // Step 5: configure plugins font style
+        // Configuring plugins font style
         const contrib = {
             ui: {
                 kitchenSink: {
@@ -109,9 +89,6 @@
 
     </script>
 
-    <!-- Note: Don't modify this part -->
-    <% for (var chunk in htmlWebpackPlugin.files.chunks) { %><script id="bundle" async src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script><% } %>
-
     <link rel="stylesheet" href="resize.css">
     <script src="resize.js"></script>
 
@@ -123,7 +100,6 @@
             height: 100%;
         }
     </style>
-    <!-- End of Note: Don't modify this part -->
 </head>
 
 <body>
@@ -144,40 +120,39 @@
 <script>
     var player;
 
-
     function changeMedia() {
         player.loadMedia({
             entryId: switchMediaEntryId
         });
     }
 
-    var config = {
-        logLevel: "DEBUG",
-        targetId: "player-div",
-        provider: {
-            env: env,
-            partnerId: partnerId,
-            uiConfId: uiConfId,
-            ks: ks
-        },
-        session: {
-            userId: userId
-        },
-        contrib,
-        plugins: plugins,
-        ui: {
-            debug: true
-        }
-    };
+    fetchConfigs((env, {data}) => {
+        let config = {
+            logLevel: "DEBUG",
+            targetId: "player-div",
+            provider: {
+                env: env,
+                partnerId: data.partnerId,
+                uiConfId: data.uiConfId,
+                ks: data.ks
+            },
+            session: {
+                userId: data.userId
+            },
+            contrib,
+            plugins: plugins,
+            ui: {
+                debug: true
+            }
+        };
 
-    document.getElementById("bundle").onload =  function(){
+        let mediaInfo = {entryId: data.entryId};
 
-        var mediaInfo = { entryId: entryId };
         player = KalturaPlayer.setup(config);
         player.loadMedia(mediaInfo);
-    }
 
-    makeResizableDiv('.resizable');
+        makeResizableDiv('.resizable');
+    })
 </script>
 
 </body>
