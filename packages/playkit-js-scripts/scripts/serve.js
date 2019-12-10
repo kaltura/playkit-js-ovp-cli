@@ -36,13 +36,7 @@ async function modeSelection() {
     const appTestFolder = `${appPath}/test`;
     const appConfigPath = path.join(appTestFolder, 'config.json');
     const appEnvPath = path.join(appTestFolder, 'env.json');
-    let isFilesExist = false;
-
-    try {
-        isFilesExist = [appConfigPath, appEnvPath].map(file => fs.existsSync(file)).every(Boolean);
-    } catch (e) {
-        console.error('Error while reading files paths.');
-    }
+    const isFilesExist = [appConfigPath, appEnvPath].map(file => fs.existsSync(file)).every(Boolean);
 
     if (!isFilesExist) {
         const modes = await modeSelection();
