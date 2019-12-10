@@ -48,6 +48,8 @@ async function modeSelection() {
         const modes = await modeSelection();
         createConfigFiles(appTestFolder, modes);
     }
+
+    require('./start');
 })();
 
 function createConfigFiles(appTestFolder, modes) {
