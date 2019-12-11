@@ -37,7 +37,6 @@ const resolveModule = (resolveFn, filePath) => {
 
 const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 const pluginV7 = resolveApp('packages/pluginV7');
-const pluginV2 = resolveApp('packages/pluginV2');
 module.exports = {
     pluginV7: {
         packageJson: path.join(pluginV7, 'package.json'),
@@ -49,6 +48,8 @@ module.exports = {
     },
     dotenv: resolveApp('.env'),
     appPath: resolveApp('.'),
+    appKalturaContrib: resolveApp('.kaltura-contrib'),
+    appOverrideWebpack: resolveModule(resolveApp, '.kaltura-contrib/webpack.config'),
     appBuild: resolveApp('build'),
     appPublic: resolveApp('public'),
     appHtml: resolveApp('public/index.html'),

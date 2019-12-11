@@ -1,8 +1,9 @@
 'use strict';
 
-// Do this as the first thing so that any code reading it knows the right env.
-process.env.BABEL_ENV = 'production';
-process.env.NODE_ENV = 'production';
+const buildEnv = {
+    PRODUCTION: 'production',
+    DEVELOPMENT: 'development',
+};
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -11,25 +12,40 @@ process.on('unhandledRejection', err => {
     throw err;
 });
 
-// // Ensure environment variables are read.
-// require('../config/env');
-// // @remove-on-eject-begin
-// // Do the preflight checks (only happens before eject).
-// const verifyPackageTree = require('./utils/verifyPackageTree');
-// if (process.env.SKIP_PREFLIGHT_CHECK !== 'true') {
-//     verifyPackageTree();
-// }
-// // @remove-on-eject-end
-
 const path = require('path');
+const { appOverrideWebpack, appPath } = require('../config/paths');
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const webpack = require('webpack');
-const configFactory = require('../config/webpack.config.v7');
-const paths = require('../config/paths');
+const configDev = require('../config/webpack.dev');
+const configProd = require('../config/webpack.prod');
+const commander = require('commander');
+let config = null;
 
-// Generate configuration
-const config = configFactory('production', {mode: 'production'});
+
+const program = new commander.Command('build')
+    .option(
+        '--dev',
+        'the development build'
+    )
+    .parse(process.argv);
+
+if (program.dev) {
+    config = configDev;
+    process.env.BABEL_ENV = buildEnv.DEVELOPMENT;
+    process.env.NODE_ENV = buildEnv.DEVELOPMENT;
+} else {
+    config = configProd;
+    process.env.BABEL_ENV = buildEnv.PRODUCTION;
+    process.env.NODE_ENV = buildEnv.PRODUCTION;
+}
+
+if (fs.existsSync(appOverrideWebpack)) {
+    const overrideWebpack = require(appOverrideWebpack);
+    config = overrideWebpack(config);
+    console.log(chalk.blue(`Using webpack config from ${path.relative(appPath, appOverrideWebpack)}.\n`));
+}
+
 build().then(({ stats, warnings }) => {
     if (warnings.length) {
         console.log(chalk.yellow('Compiled with warnings.\n'));
@@ -47,19 +63,10 @@ build().then(({ stats, warnings }) => {
     } else {
         console.log(chalk.green('Compiled successfully.\n'));
     }
-
-    console.log();
-    //
-    // const appPackage = require(paths.appPackageJson);
-    // const publicUrl = paths.publicUrl;
-    // const publicPath = config.output.publicPath;
-    // const buildFolder = path.relative(process.cwd(), paths.appBuild);
-
 });
 
-// Create the production build and print the deployment instructions.
 function build() {
-    console.log('Creating an optimized production build...');
+    console.log(`Creating an optimized ${program.dev ? buildEnv.DEVELOPMENT : buildEnv.PRODUCTION} build...`);
 
     const compiler = webpack(config);
     return new Promise((resolve, reject) => {
