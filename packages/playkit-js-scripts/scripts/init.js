@@ -104,7 +104,7 @@ module.exports = function (
         "reset": "npm run clean && rm -rf node_modules",
         "build": "webpack --config webpack.prod.js",
         "build:dev": "webpack --config webpack.dev.js",
-        "serve": "webpack-dev-server --open --config webpack.dev.js",
+        "serve": "kcontrib serve && webpack-dev-server --open --config webpack.dev.js",
         "serve:external": "npm run serve -- --host 0.0.0.0",
         "analyze": "npm run build && npx source-map-explorer dist/playkit-js-qna.js",
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
