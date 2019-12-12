@@ -63,8 +63,6 @@ build().then(({ stats, warnings }) => {
     } else {
         console.log(chalk.green('Compiled successfully.\n'));
     }
-
-    console.log();
 });
 
 function build() {
