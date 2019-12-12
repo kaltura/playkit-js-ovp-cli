@@ -25,37 +25,36 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        use: ['source-map-loader'],
+        use: [require.resolve('source-map-loader')],
         enforce: 'pre'
       },
       {
         test: /\.tsx?$/,
-        loader: "awesome-typescript-loader"
+        loader: require.resolve("awesome-typescript-loader"),
       },
       {
         test: /\.scss$/,
         use: [
           {
-            loader: 'style-loader'
+            loader: require.resolve('style-loader'),
           },
           {
-            loader: 'css-loader',
+            loader: require.resolve('css-loader'),
             options: {
-              localsConvention: 'camelCase',
-              modules: {
-                localIdentName: 'contrib[name]__[local]___[hash:base64:5]'
-              },
+              modules: true,
+              camelCase: true,
+              localIdentName: '[path][name]__[local]--[hash:base64:5]',
             }
           },
           {
-            loader: 'sass-loader'
+            loader: require.resolve('sass-loader')
           }
         ]
       },
       {
         test: /\.svg/,
         use: {
-          loader: 'svg-url-loader',
+          loader: require.resolve('svg-url-loader'),
           options: {}
         }
       }

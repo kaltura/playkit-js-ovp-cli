@@ -105,7 +105,6 @@ module.exports = function (
         "build": "kcontrib build",
         "build:dev": "kcontrib build --dev",
         "serve": "kcontrib serve",
-        "serve:external": "npm run serve -- --host 0.0.0.0",
         "analyze": "npm run build && npx source-map-explorer dist/playkit-js-qna.js",
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",

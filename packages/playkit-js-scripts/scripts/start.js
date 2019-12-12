@@ -54,8 +54,6 @@ if (process.env.HOST) {
 // browserslist defaults.
 const { checkBrowsers } = require('react-dev-utils/browsersHelper');
 
-console.log('WOOLL:', paths.appPath);
-
 checkBrowsers(paths.appPath, isInteractive)
     .then(() => {
         // We attempt to use the default port but if it is busy, we offer the user to
