@@ -1,6 +1,5 @@
-const commander = require('commander');
 const path = require('path');
-const spawn = require('cross-spawn');
+const paths = require('../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const os = require('os');
@@ -15,7 +14,7 @@ const modes = {
 const modesTypes = Object.keys(modes);
 
 async function modeSelection() {
-    const onCancel = prompt => {
+    const onCancel = () => {
         console.log(`${chalk.red('Canceled!')}`);
         process.exit(1);
     };
@@ -32,15 +31,11 @@ async function modeSelection() {
 }
 
 (async () => {
-    const appPath = process.cwd();
-    const appTestFolder = `${appPath}/test`;
-    const appConfigPath = path.join(appTestFolder, 'config.json');
-    const appEnvPath = path.join(appTestFolder, 'env.json');
-    const isFilesExist = [appConfigPath, appEnvPath].map(file => fs.existsSync(file)).every(Boolean);
+    const isFilesExist = [paths.appConfig, paths.appEnv].map(file => fs.existsSync(file)).every(Boolean);
 
     if (!isFilesExist) {
         const modes = await modeSelection();
-        createConfigFiles(appTestFolder, modes);
+        createConfigFiles(paths.appTest, modes);
     }
 
     require('./start');
