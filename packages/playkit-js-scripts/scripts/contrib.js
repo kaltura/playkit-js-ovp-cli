@@ -4,6 +4,7 @@ const spawn = require('cross-spawn');
 const packageJson = require('../package.json');
 const VARIABLES = require('../config/variables.config');
 const chalk = require('chalk');
+const {getPlaykitPackages} = require('../utils');
 
 const contribTypes = {
     LATEST: 'latest',
@@ -17,15 +18,30 @@ const program = new commander.Command(packageJson.name)
         '--type <latest|next|local>',
         'choose a type of the contrib script'
     )
+    .option(
+        '--add',
+        'add a new playkit library to the project'
+    )
     .parse(process.argv);
 
 (async () => {
+    if(program.add) {
+        return require('./add');
+    }
+
     const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
-    console.log(`sakal ${program.type} ${process.argv}`);
     if (!program.type || !contribTypesValues.includes(program.type)) {
         return console.error(`
-        ${chalk.red('Please, provide the correct type parameter for the contrib script.')}
+        ${chalk.red('Please, provide one of the correct parameter for the contrib script.')}
+            
+            You could add playkit library to the project by running:
+                --add
+            
+            For example: kcontrib contrib --add
+        
+        
+            Provide type parameter to update playkit libraries.
             Types could be:
                 - ${contribTypes.LATEST}
                 - ${contribTypes.NEXT}
@@ -54,13 +70,8 @@ const program = new commander.Command(packageJson.name)
             break;
     }
 
-    const packages = Object.keys(appPackage.dependencies)
-        .reduce((forInstall, dependency) => {
-            const [_, playkitPackage] = dependency.split(`${VARIABLES.CONTRIB}/`);
-
-            return playkitPackage ? [...forInstall, playkitPackage] : forInstall;
-        }, [])
-        .map(packageName => `${VARIABLES.CONTRIB}/${packageName}${npmTag}`);
+    const packages = getPlaykitPackages()
+        .map(packageName => `${packageName}${npmTag}`);
 
     const packagesSummary = packages.map(packageName => `- ${packageName}\n`).join('');
 
