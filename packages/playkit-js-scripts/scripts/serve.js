@@ -4,15 +4,8 @@ const fs = require('fs-extra');
 const prompts = require('prompts');
 const os = require('os');
 const { runScript } = require('../utils');
+const VARIABLES = require('../config/variables.config');
 
-const modes = {
-    userType: ['annonymous', 'widgetId', 'ks'],
-    bundler: ['custom', 'uiconf'],
-    serverEnv: ['qa', 'production'],
-    bundlerEnv: ['qa', 'production'],
-};
-
-const modesTypes = Object.keys(modes);
 
 async function modeSelection() {
     const onCancel = () => {
@@ -20,11 +13,11 @@ async function modeSelection() {
         process.exit(1);
     };
 
-    const chooseModes = modesTypes.map(mode => ({
+    const chooseModes = VARIABLES.modesTypes.map(mode => ({
         type: "select",
         name: mode,
         message: `Choose ${mode}:`,
-        choices: modes[mode].map(value => ({title: value, value})),
+        choices: VARIABLES.modes[mode].map(value => ({title: value, value})),
         initial: 0,
     }));
 

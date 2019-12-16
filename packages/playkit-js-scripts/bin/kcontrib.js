@@ -30,6 +30,7 @@ switch (script) {
     case 'serve':
     case 'start':
     case 'update-client':
+    case 'change-modes':
     case 'test': {
         const result = spawn.sync(
             'node',

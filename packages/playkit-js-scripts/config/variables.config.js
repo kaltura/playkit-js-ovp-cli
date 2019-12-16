@@ -5,6 +5,15 @@ const CONTRIB = '@playkit-js-contrib';
 const REPO = 'https://github.com/kaltura/playkit-js-contrib.git';
 const TAG_PATTERN = 'kaltura-ovp-player@';
 
+const modes = {
+    userType: ['annonymous', 'widgetId', 'ks'],
+    bundler: ['custom', 'uiconf'],
+    serverEnv: ['qa', 'production'],
+    bundlerEnv: ['qa', 'production'],
+};
+
+const modesTypes = Object.keys(modes);
+
 module.exports = {
     TEMPLATE,
     TEMPLATE_FOR_REPLACE_LOWERCASE,
@@ -12,4 +21,6 @@ module.exports = {
     CONTRIB,
     REPO,
     TAG_PATTERN,
+    modes,
+    modesTypes,
 };
