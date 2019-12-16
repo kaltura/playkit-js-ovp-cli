@@ -1,16 +1,13 @@
 const commander = require('commander');
 const path = require('path');
 const spawn = require('cross-spawn');
-const packageJson = require('../package.json');
-const VARIABLES = require('../config/variables.config');
+const packageJson = require('../../package.json');
+const VARIABLES = require('../../config/variables.config');
 const chalk = require('chalk');
-const {getPlaykitPackages} = require('../utils');
-
-const contribTypes = {
-    LATEST: 'latest',
-    NEXT: 'next',
-    LOCAL: 'local',
-};
+const {
+    getPlaykitPackages, contribTypes, contribTypesValues,
+    chooseTagAndStrategy, installPackages
+} = require('./shared-helpers');
 
 const program = new commander.Command(packageJson.name)
     .version(packageJson.version)
@@ -25,11 +22,9 @@ const program = new commander.Command(packageJson.name)
     .parse(process.argv);
 
 (async () => {
-    if(program.add) {
+    if (program.add) {
         return require('./add');
     }
-
-    const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
     if (!program.type || !contribTypesValues.includes(program.type)) {
         return console.error(`
@@ -51,24 +46,7 @@ const program = new commander.Command(packageJson.name)
     `);
     }
 
-    const appPath = process.cwd();
-    const appPackage = require(path.join(appPath, 'package.json'));
-    let installStrategy = 'install';
-    let npmTag = null;
-
-
-    switch (program.type) {
-        case contribTypes.LATEST:
-            npmTag = '@latest';
-            break;
-        case contribTypes.NEXT:
-            npmTag = '@next';
-            break;
-        case contribTypes.LOCAL:
-            installStrategy = 'link';
-            npmTag = '';
-            break;
-    }
+    const {installStrategy, npmTag} = chooseTagAndStrategy(program.type);
 
     const packages = getPlaykitPackages()
         .map(packageName => `${packageName}${npmTag}`);
@@ -85,15 +63,5 @@ ${packagesSummary}
 ${packagesSummary}`);
     }
 
-    const child = spawn('npm', [installStrategy, ...packages], {
-        stdio: 'inherit'
-    });
-
-    child.on('close', code => {
-        if (code !== 0) {
-            console.error(
-                `Error while updating packages.`
-            );
-        }
-    });
+    installPackages(installStrategy, packages);
 })();

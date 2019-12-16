@@ -1,19 +1,15 @@
 const path = require('path');
 const spawn = require('cross-spawn');
-const packageJson = require('../package.json');
-const VARIABLES = require('../config/variables.config');
+const packageJson = require('../../package.json');
+const VARIABLES = require('../../config/variables.config');
 const chalk = require('chalk');
 const {exec} = require('child_process');
-const {getPlaykitPackages} = require('../utils');
 const prompts = require('prompts');
+const {
+    getPlaykitPackages, contribTypes, contribTypesValues,
+    chooseTagAndStrategy, installPackages
+} = require('./shared-helpers');
 
-const contribTypes = {
-    LATEST: 'latest',
-    NEXT: 'next',
-    LOCAL: 'local',
-};
-
-const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
 (async() => {
     const currentPackages = getPlaykitPackages();
@@ -30,10 +26,13 @@ const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key
 
     console.log('Available For Install:: ', availableForInstall);
 
-    const result = await askForInstall(availableForInstall);
+    const {packages, tag} = await askForInstall(availableForInstall);
+    const {installStrategy, npmTag} = chooseTagAndStrategy(tag);
+    const packagesForInstall = packages.map(packageName => `${packageName}${npmTag}`);
 
-    console.log('result', result);
+    console.log('Packages will be installed:\n', packagesForInstall.map(packageName => `- ${packageName}\n`).join(''));
 
+    installPackages(installStrategy, packagesForInstall);
 })();
 
 function getAllPackages() {
@@ -68,7 +67,7 @@ async function askForInstall(packagesForInstall) {
         type: 'select',
         name: 'tag',
         message: `Choose tag for packages to be installed:`,
-        choices: contribTypesValues,
+        choices: contribTypesValues.map(contribType => ({title: contribType, value: contribType})),
     };
 
     return await prompts([choosePackages, chooseTag], {onCancel});
