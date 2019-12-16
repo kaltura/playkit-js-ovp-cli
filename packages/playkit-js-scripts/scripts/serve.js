@@ -3,6 +3,7 @@ const paths = require('../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const os = require('os');
+const { runScript } = require('../utils');
 
 const modes = {
     userType: ['annonymous', 'widgetId', 'ks'],
@@ -31,14 +32,17 @@ async function modeSelection() {
 }
 
 (async () => {
+    const runStart = () => require('./start');
     const isFilesExist = [paths.appConfig, paths.appEnv].map(file => fs.existsSync(file)).every(Boolean);
 
     if (!isFilesExist) {
         const modes = await modeSelection();
         createConfigFiles(paths.appTest, modes);
+
+        return runScript(path.resolve(__dirname, './update-client.js'), runStart);
     }
 
-    require('./start');
+    runStart();
 })();
 
 function createConfigFiles(appTestFolder, modes) {
