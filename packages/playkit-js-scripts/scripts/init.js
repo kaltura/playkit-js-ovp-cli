@@ -15,6 +15,7 @@ const {
 const format = require("string-template");
 const compile = require("string-template/compile");
 const path = require('path');
+const paths = require('../config/paths');
 const chalk = require('chalk');
 const walkSync = require('walk-sync');
 const execSync = require('child_process').execSync;
@@ -30,6 +31,8 @@ const defaultBrowsers = {
         'last 1 safari version',
     ],
 };
+
+const pluginName = path.basename(paths.appPath);
 
 
 function isInGitRepository() {
@@ -105,7 +108,7 @@ module.exports = function (
         "build": "kcontrib build",
         "build:dev": "kcontrib build --dev",
         "serve": "kcontrib serve",
-        "analyze": "npm run build && npx source-map-explorer dist/playkit-js-qna.js",
+        "analyze": `npm run build && npx source-map-explorer dist/${pluginName}.js`,
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
         "husky:pre-commit": "lint-staged",
@@ -117,13 +120,6 @@ module.exports = function (
         "contrib:latest": 'kcontrib contrib --type=latest',
         "contrib:next": 'kcontrib contrib --type=next',
         "contrib:local": 'kcontrib contrib --type=local',
-
-        // "start": 'playkit-js-scripts start',
-        // "start:v7": 'playkit-js-scripts start-v7',
-        // "build": 'playkit-js-scripts build',
-        // "build:v2": 'playkit-js-scripts build-v2',
-        // "test": 'playkit-js-scripts test',
-        // "eject": 'playkit-js-scripts eject',
     };
 
     // Setup the browsers list
