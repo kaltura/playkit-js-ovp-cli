@@ -110,10 +110,9 @@ module.exports = function (
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
         "husky:pre-commit": "lint-staged",
         "husky:commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-        "deploy:prepare": "node scripts/deploy-prepare.js",
-        "deploy:publish-to-npm": "node scripts/deploy-publish.js",
-        "deploy:next:publish-to-npm": "node scripts/deploy-publish.js",
-        "deploy:next:prepare": "node scripts/deploy-prepare.js --prerelease next",
+        "deploy:prepare": "kcontrib deploy --prepare",
+        "deploy:publish-to-npm": "kcontrib deploy --publish",
+        "deploy:next:prepare": "kcontrib deploy --prepare --prerelease next",
 
         "contrib:latest": 'kcontrib contrib --type=latest',
         "contrib:next": 'kcontrib contrib --type=next',

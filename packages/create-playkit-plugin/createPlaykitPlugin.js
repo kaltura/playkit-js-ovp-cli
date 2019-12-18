@@ -360,8 +360,6 @@ function run(
         "chalk",
         "fs-extra",
         "husky",
-        "inquirer",
-        "standard-version",
         "tslint",
         "typescript",
     ];

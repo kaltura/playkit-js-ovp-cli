@@ -7,7 +7,7 @@ const pluginName = path.basename(process.cwd());
 
 module.exports = {
   entry: {
-    [`playkit-js-${pluginName}`]: "./src/index.ts"
+    [pluginName]: "./src/index.ts"
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".scss", ".svg"],
