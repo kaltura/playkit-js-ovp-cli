@@ -258,7 +258,7 @@ function createApp(
     const packageJson = {
         name: projectNpmName,
         version: '0.0.1',
-        private: true,
+        private: false,
         bugs: {
             url: `https://github.com/${projectGitRepo}/issues`
         },
@@ -348,7 +348,6 @@ function run(
         "@types/classnames",
         "classnames",
         "preact",
-        "svg-url-loader",
         path.resolve(__dirname + "/libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz"),
     );
 
@@ -357,8 +356,6 @@ function run(
         "@commitlint/config-conventional",
         "@typescript-eslint/eslint-plugin",
         "@typescript-eslint/parser",
-        "chalk",
-        "fs-extra",
         "husky",
         "tslint",
         "typescript",
