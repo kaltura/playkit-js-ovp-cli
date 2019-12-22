@@ -52,8 +52,8 @@
                         : '/versions/kaltura-ovp-player=' + envOptions.bundler.customPlayerVersion);
 
                 let loaderRunner = () => callback(env, configOptions);
-                <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
-                loaderRunner = ((prevLoader) => () => loadScript("<%= htmlWebpackPlugin.files.chunks[chunk].entry %>", prevLoader))(loaderRunner);
+                <% for (var chunk in htmlWebpackPlugin.files.js) { %>
+                loaderRunner = ((prevLoader) => () => loadScript("<%= htmlWebpackPlugin.files.js[chunk] %>", prevLoader))(loaderRunner);
                 <% } %>
                 loadScript(bundlerUrl, loaderRunner);
             }))
@@ -62,22 +62,12 @@
         // Configuring relevant plugins
         const plugins = {
             '__plugin_name__': {
-                dateFormat: 'mmmm do, yyyy',
-                expandMode: 'AlongSideTheVideo',
-                expandOnFirstPlay: true,
-                userRole: 'anonymousRole' // 'unmoderatedAdminRole' || 'anonymousRole' etc'
             }
         };
 
         // Configuring plugins font style
         const contrib = {
             ui: {
-                kitchenSink: {
-                    theme: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        blur: '16px'
-                    }
-                },
                 fonts: {
                     downloadData: {
                         url: 'https://fonts.googleapis.com/css?family=Lato&display=swap',
