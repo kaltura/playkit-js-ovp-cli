@@ -16,6 +16,8 @@ module.exports = function() {
         watchOptions: {
             ignored: ignoredFiles(appSrc),
         },
+        index: "index.html",
+        port: 8017,
         // Enable HTTPS if the HTTPS environment variable is set to 'true'
         overlay: false,
         historyApiFallback: {

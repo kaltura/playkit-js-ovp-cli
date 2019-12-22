@@ -1,17 +1,16 @@
 const path = require('path');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
-const packageJson = require(path.join(process.cwd(), '/package.json'));
 const distFolder = path.join(process.cwd(), "/dist");
 const pluginName = path.basename(process.cwd());
 
 module.exports = {
   entry: {
-    [pluginName]: "./src/index.ts"
+    [pluginName]: path.resolve(process.cwd(), "./src/index.ts")
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".scss", ".svg"],
-    modules: [path.resolve(process.cwd(), "node_modules")],
+    modules: ["node_modules", path.resolve(process.cwd(), "node_modules")],
     symlinks: false
   },
   output: {

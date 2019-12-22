@@ -5,6 +5,7 @@ const prompts = require('prompts');
 const os = require('os');
 const { runScript } = require('../utils');
 const VARIABLES = require('../config/variables.config');
+const chalk = require('chalk');
 
 
 async function modeSelection() {
@@ -29,12 +30,20 @@ async function modeSelection() {
     const isFilesExist = [paths.appConfig, paths.appEnv].map(file => fs.existsSync(file)).every(Boolean);
 
     if (!isFilesExist) {
+        console.log(chalk`{blue It appears to be the first time you run serve in this project.
+We will ask you several questions to set up the environment. If you don't know an answer feel free to choose the default option.
+Don't worry, you can easily change your answers when you need to.}`);
+
         const modes = await modeSelection();
         createConfigFiles(paths.appTest, modes);
 
         return runScript(path.resolve(__dirname, './update-client.js'), runStart);
-    }
+    } else {
+        console.log(chalk`{blue Found local serve configuration. 
+        
+To modify them read 'test/readme.md' file}.`);
 
+    }
     runStart();
 })();
 

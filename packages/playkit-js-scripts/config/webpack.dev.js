@@ -10,13 +10,6 @@ const testFolder = path.join(process.cwd(), "/test");
  module.exports = merge(common, {
    mode: 'development',
    devtool: 'inline-source-map',
-   devServer: {
-     historyApiFallback: true,
-     hot: false,
-     inline: true,
-     index: "index.html",
-     port: 8017
-   },
    plugins: [
      new HtmlWebpackPlugin({
        alwaysWriteToDisk: true,
