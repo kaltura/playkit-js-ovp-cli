@@ -103,9 +103,7 @@
     "webpack-merge": "^4.2.2",
     "workbox-webpack-plugin": "4.2.0"
   },
-  "devDependencies": {
-    "preact": "^8.2.5"
-  },
+  "devDependencies": {},
   "optionalDependencies": {
     "fsevents": "1.2.7"
   },
