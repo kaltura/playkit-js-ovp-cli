@@ -64,7 +64,7 @@ function tryGitInit(appPath) {
         execSync('git add -A', {
             stdio: 'ignore'
         });
-        execSync('git commit -m "Initial commit from Create React App"', {
+        execSync('git commit -m "Initial commit"', {
             stdio: 'ignore',
         });
         return true;
@@ -192,17 +192,17 @@ module.exports = function (
         fs.unlinkSync(templateDependenciesPath);
     }
 
-    if (!isPreactInstalled(appPackage) || template) {
-        console.log(`Installing preact using ${command}...`);
-        console.log();
-
-        const proc = spawn.sync(command, args, {
-            stdio: 'inherit'
-        });
-        if (proc.status !== 0) {
-            console.error(`\`${command} ${args.join(' ')}\` failed`);
-            return;
-        }
+    // install local kaltura client
+    console.log(`Installing local Kaltura client library using ${command}...`);
+    console.log();
+    const proc = spawn.sync(command,
+      ['install', '--save', verbose && '--verbose',
+      `file:libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz`], {
+        stdio: 'inherit'
+    });
+    if (proc.status !== 0) {
+        console.error(`failed to install local Kaltura client library`);
+        return;
     }
 
     replaceTemplate(appPath, appName);
@@ -326,10 +326,3 @@ function installSubPackages(appPath, verbose) {
     process.chdir(originalDirectory);
 }
 
-function isPreactInstalled(appPackage) {
-    const dependencies = appPackage.dependencies || {};
-
-    return (
-        typeof dependencies.preact !== 'undefined'
-    );
-}
