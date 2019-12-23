@@ -52,8 +52,8 @@
                         : '/versions/kaltura-ovp-player=' + envOptions.bundler.customPlayerVersion);
 
                 let loaderRunner = () => callback(env, configOptions);
-                <% for (var chunk in htmlWebpackPlugin.files.js) { %>
-                loaderRunner = ((prevLoader) => () => loadScript("<%= htmlWebpackPlugin.files.js[chunk] %>", prevLoader))(loaderRunner);
+                <% for (var index in htmlWebpackPlugin.files.js) { %>
+                loaderRunner = ((prevLoader) => () => loadScript("<%= htmlWebpackPlugin.files.js[index] %>", prevLoader))(loaderRunner);
                 <% } %>
                 loadScript(bundlerUrl, loaderRunner);
             }))
