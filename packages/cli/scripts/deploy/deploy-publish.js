@@ -59,13 +59,9 @@ This script will publish version {bold ${version}} to npm.
     const answers = await prompts(
         [
             {
-                name: 'ready',
-                type: 'confirm',
-                message: 'Are you ready to begin?'
-            },
-            {
                 name: 'confirmVersion',
                 type: 'confirm',
+                initial: true,
                 message: `Are you trying to publish version ${version}?`
             },
             {
@@ -78,24 +74,19 @@ This script will publish version {bold ${version}} to npm.
                 name: 'skipRebuild',
                 type: _ => skipRebuild ? 'confirm' : null,
                 message: `Are you sure you want to skip rebuild (accept only if you just ran the prepare locally)?`,
-                initial: false,
+                initial: true,
             },
         ],
         {onCancel}
     );
 
-    if (!answers.ready) {
-        console.log('See you next time....');
+    if (!answers.confirmVersion) {
+        console.log(chalk.red(`Operation cancelled by user.`));
         return false;
     }
 
     if (skipRebuild && !answers.skipRebuild) {
         console.log(chalk.red(`Cannot continue with the publish. argument 'skipRebuild' was falsy provided.`));
-        return false;
-    }
-
-    if (!answers.confirmVersion) {
-        console.log(chalk.red(`Cannot continue with the publish. Current version is set to ${version} (Did you remember to prepare the requested version?)`));
         return false;
     }
 
@@ -120,10 +111,11 @@ function getPluginVersion() {
 (async function () {
     try {
         const version = getPluginVersion();
-        const result = execSync('git tag --sort=committerdate | tail -1').toString();
+        const result = execSync('git tag --sort=committerdate | head -1').toString();
 
-        if (version !== result.match('^v(.*)').pop()) {
-            return console.log(chalk.red(`Cannot publish. Current tag version is not matching package.json version.`));
+        const currentTag = result.match('^v(.*)').pop();
+        if (version !== currentTag) {
+            return console.log(chalk.red(`Cannot publish. Current tag version is not matching package.json version (expected ${version} got ${currentTag}).`));
         }
 
         if (!await promptWelcome()) {
@@ -139,7 +131,7 @@ function getPluginVersion() {
             runSpawn('npm', ['run', 'build']);
         }
         console.log(chalk.blue(`publish to npm`));
-        runSpawn('npm', ['publish', '--access', 'public', ...extraArgs]);
+        runSpawn('npm', ['publish', '--access', 'public']);
 
         showSummary();
     } catch (err) {

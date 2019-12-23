@@ -5,6 +5,7 @@ const paths = require('../../config/paths');
 const {spawnSync} = require('child_process');
 const os = require("os");
 const prompts = require('prompts');
+const standardVersion = require('standard-version');
 
 const extraArgs = process.argv.splice(4);
 
@@ -64,11 +65,6 @@ This script will prepare the next plugin version.
     const answers = await prompts(
         [
             {
-                name: 'ready',
-                type: 'confirm',
-                message: 'Are you ready to begin?'
-            },
-            {
                 name: 'contrib',
                 type: 'confirm',
                 message: 'Did you work with local version of contrib libraries?'
@@ -82,11 +78,6 @@ This script will prepare the next plugin version.
         ],
         {onCancel}
     );
-
-    if (!answers.ready) {
-        console.log('See you next time....');
-        return false;
-    }
 
     if (answers.contrib) {
         if (!answers.contribLatest) {
@@ -107,7 +98,8 @@ function getPluginVersion() {
     return playerPackageJson['version'];
 }
 
-(async function () {
+module.exports = async function run(options) {
+    const { prerelease } = options;
     try {
 
         if (!await promptWelcome()) {
@@ -121,7 +113,15 @@ function getPluginVersion() {
         console.log(chalk.blue(`build code and run open analyzer`));
         runSpawn('npm', ['run', 'analyze']);
         console.log(chalk.blue(`run standard version`));
-        runSpawn(path.resolve(binPath, 'standard-version'), extraArgs);
+
+        await standardVersion({
+              "skip": {
+                  "tag": true,
+                  "commit": true
+              },
+            prerelease: prerelease ? prerelease : undefined
+          }
+        );
         console.log(chalk.blue(`git stage all changes`));
         runSpawn('git', ['add', '*']);
 
@@ -129,6 +129,4 @@ function getPluginVersion() {
     } catch (err) {
         console.error(err);
     }
-})();
-
-
+}

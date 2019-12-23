@@ -10,11 +10,15 @@ const program = new commander.Command('deploy')
         '--publish',
         'publish current version'
     )
+    .option(
+        '--prerelease',
+        'prerelease tag name'
+    )
     .parse(process.argv);
 
 (async () => {
     if (program.prepare) {
-        return require('./deploy-prepare');
+        return require('./deploy-prepare')({prerelease: program.prerelease});
     }
     if (program.publish) {
         return require('./deploy-publish');
