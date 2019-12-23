@@ -15,7 +15,8 @@
     "config",
     "scripts",
     "template",
-    "utils"
+    "utils",
+    "LICENSE"
   ],
   "bin": {
     "kcontrib": "./bin/kcontrib.js"
