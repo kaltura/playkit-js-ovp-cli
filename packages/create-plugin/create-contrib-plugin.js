@@ -470,7 +470,7 @@ function getInstallPackage(version, originalDirectory) {
     // }
     return `file:${path.resolve(
         __dirname,
-        '../playkit-js-scripts'
+        '../cli'
     )}`;
 }
 
