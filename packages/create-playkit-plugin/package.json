@@ -1,24 +1,21 @@
 {
-  "name": "create-playkit-plugin",
+  "name": "@playkit-js-contrib/create-plugin",
   "version": "0.0.1",
-  "keywords": [
-    "playkit"
-  ],
-  "description": "Create playkit plugin",
-  "repository": "omridevk/playkit-js-ovp",
-  "license": "MIT",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaltura/playkit-js-contrib-cli"
+  },
+  "license": "AGPL-3.0",
   "engines": {
     "node": ">=8"
   },
-  "bugs": {
-    "url": "https://github.com/omridevk/playkit-js-ovp/issues"
-  },
   "files": [
     "index.js",
-    "createPlaykitPlugin.js"
+    "create-contrib-plugin.js"
   ],
   "bin": {
-    "create-playkit-plugin": "./index.js"
+    "create": "./index.js"
   },
   "dependencies": {
     "chalk": "2.4.2",

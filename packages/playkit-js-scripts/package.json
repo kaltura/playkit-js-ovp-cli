@@ -1,14 +1,14 @@
 {
-  "name": "kcontrib",
+  "name": "@playkit-js-contrib/cli",
   "version": "0.0.1",
-  "description": "Configuration and scripts for Create Playkit Plugin.",
-  "repository": "omridevk/playkit-js-ovp",
-  "license": "MIT",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaltura/playkit-js-contrib-cli"
+  },
+  "license": "AGPL-3.0",
   "engines": {
     "node": ">=8.10"
-  },
-  "bugs": {
-    "url": "https://github.com/omridevk/playkit-js-ovp/issues"
   },
   "files": [
     "bin",
@@ -103,20 +103,5 @@
     "webpack-merge": "^4.2.2",
     "workbox-webpack-plugin": "4.2.0"
   },
-  "devDependencies": {},
-  "optionalDependencies": {
-    "fsevents": "1.2.7"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "devDependencies": {}
 }
