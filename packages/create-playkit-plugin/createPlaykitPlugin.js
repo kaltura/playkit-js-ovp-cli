@@ -252,7 +252,7 @@ function createApp(
         process.exit(1);
     }
 
-    console.log(`Creating a new React app in ${chalk.green(projectDestination)}.`);
+    console.log(`Creating a new contrib plugin for Kaltura player v7 in ${chalk.green(projectDestination)}.`);
     console.log();
 
     const packageJson = {
@@ -338,27 +338,24 @@ function run(
     template,
 ) {
     const packageToInstall = getInstallPackage(version, originalDirectory);
-    const allDependencies = ['preact', packageToInstall];
+    const allDependencies = ['preact@8.x', packageToInstall];
     allDependencies.push(
-        '@types/node',
-        'typescript',
         '@playkit-js-contrib/common',
         "@playkit-js-contrib/plugin",
         "@playkit-js-contrib/ui",
-        "@types/classnames",
-        "classnames",
-        "preact",
-        path.resolve(__dirname + "/libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz"),
+        "classnames"
     );
 
     const devDependencies = [
-        "@commitlint/cli",
-        "@commitlint/config-conventional",
-        "@typescript-eslint/eslint-plugin",
-        "@typescript-eslint/parser",
-        "husky",
-        "tslint",
-        "typescript",
+        '@types/node',
+        "@types/classnames",
+        "@commitlint/cli@8.x",
+        "@commitlint/config-conventional@8.x",
+        "@typescript-eslint/eslint-plugin@2.x",
+        "@typescript-eslint/parser@2.x",
+        "husky@3.x",
+        "tslint@5.x",
+        "typescript@3.x"
     ];
 
     console.log('Installing packages. This might take a couple of minutes.');
@@ -369,7 +366,7 @@ function run(
         .then(info => {
             const packageName = info.packageName;
             console.log(
-                `Installing ${chalk.cyan('preact')} and ${chalk.cyan(packageName)}...`
+                `Installing ${chalk.cyan(packageName)} cli library...`
             );
             console.log();
 
