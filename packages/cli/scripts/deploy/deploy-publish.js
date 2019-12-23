@@ -111,7 +111,7 @@ function getPluginVersion() {
 (async function () {
     try {
         const version = getPluginVersion();
-        const result = execSync('git tag --sort=committerdate | head -1').toString();
+        const result = execSync('git tag --sort=taggerdate | tail -1').toString();
 
         const currentTag = result.match('^v(.*)').pop();
         if (version !== currentTag) {
