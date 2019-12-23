@@ -100,6 +100,7 @@ module.exports = function (
 
     // Copy over some of the devDependencies
     appPackage.dependencies = appPackage.dependencies || {};
+    appPackage.license = "AGPL-3.0";
 
     // Setup the script rules
     appPackage.scripts = {
