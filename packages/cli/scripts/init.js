@@ -116,6 +116,8 @@ module.exports = function (
         "build": "kcontrib build",
         "build:dev": "kcontrib build --dev",
         "serve": "kcontrib serve",
+        "serve:update-modes": "kcontrib serve --update-modes",
+        "serve:update-player": "kcontrib serve --update-player",
         "analyze": `npm run build && npx source-map-explorer dist/${appName}.js`,
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
@@ -125,9 +127,9 @@ module.exports = function (
         "deploy:publish-to-npm": "kcontrib deploy --publish",
         "deploy:next:prepare": "kcontrib deploy --prepare --prerelease next",
 
-        "contrib:latest": 'kcontrib contrib --type=latest',
-        "contrib:next": 'kcontrib contrib --type=next',
-        "contrib:local": 'kcontrib contrib --type=local',
+        "infra:latest": 'kcontrib infra --type=latest',
+        "infra:next": 'kcontrib infra --type=next',
+        "infra:local": 'kcontrib infra --type=local',
     };
 
     // Setup the browsers list

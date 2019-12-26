@@ -1,9 +1,9 @@
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const chalk = require('chalk');
-const VARIABLES = require('../config/variables.config');
+const VARIABLES = require('../../config/variables.config');
 const {exec} = require('child_process');
 const os = require('os');
 

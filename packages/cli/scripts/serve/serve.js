@@ -1,10 +1,10 @@
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const os = require('os');
-const { runScript } = require('../utils');
-const VARIABLES = require('../config/variables.config');
+const { runScript } = require('../../utils');
+const VARIABLES = require('../../config/variables.config');
 const chalk = require('chalk');
 
 
@@ -37,7 +37,7 @@ Don't worry, you can easily change your answers when you need to.}`);
         const modes = await modeSelection();
         createConfigFiles(paths.appTest, modes);
 
-        return runScript(path.resolve(__dirname, './update-client.js'), runStart);
+        return runScript(path.resolve(__dirname, '../update-client.js'), runStart);
     } else {
         const envJson = require(paths.appEnv);
         const env = envJson.env[envJson.modes.bundlerEnv];
@@ -53,9 +53,9 @@ To modify them read 'test/readme.md' file}.`);
 })();
 
 function createConfigFiles(appTestFolder, modes) {
-    const configFilePath = path.resolve(__dirname, '../config/config.json');
-    const readmeFilePath = path.resolve(__dirname, '../config/readme.md');
-    const envFile = require(path.resolve(__dirname, '../config/env.json'));
+    const configFilePath = path.resolve(__dirname, '../../config/config.json');
+    const readmeFilePath = path.resolve(__dirname, '../../config/readme.md');
+    const envFile = require(path.resolve(__dirname, '../../config/env.json'));
 
     envFile.modes = modes;
 
