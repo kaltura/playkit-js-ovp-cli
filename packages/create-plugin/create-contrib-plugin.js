@@ -134,7 +134,7 @@ if (program.info) {
 }
 
 async function askProjectOptions() {
-    const validation = (pattern = /^[a-zA-Z-]*$/g) => input => {
+    const validation = (pattern = /^[a-zA-Z-][a-zA-Z0-9-]*$/g) => input => {
         if (!input) {
             return "This field should not be empty.";
         }
@@ -168,7 +168,7 @@ async function askProjectOptions() {
         type: "text",
         name: "npmName",
         message: "Please specify the plugin NPM name:",
-        validate: validation(/^(@[a-z-]+\/[a-z-]+|[a-z-]+)$/g),
+        validate: validation(/^(@[a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
         initial: `@playkit-js/${name}-plugin`,
         required: true,
     });
@@ -177,7 +177,7 @@ async function askProjectOptions() {
         type: "text",
         name: "githubRepo",
         message: `Please specify the plugin GitHub repository:`,
-        validate: validation(/^([a-z-]+\/[a-z-]+|[a-z-]+)$/g),
+        validate: validation(/^([a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
         initial: `kaltura/playkit-js-${name}`,
         required: true,
     });
