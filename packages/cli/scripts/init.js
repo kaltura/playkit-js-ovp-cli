@@ -284,11 +284,12 @@ function replaceTemplate(appPath, appName) {
         .forEach(file => {
             const content = fs.readFileSync(file, 'utf8');
             const filename = path.basename(file);
-            const hasTemplateInContent = content ? VARIABLES.TEMPLATE.test(content) : false;
+            const hasTemplateInContent = content ? VARIABLES.TEMPLATE.test(content) || VARIABLES.DATE_TEMPLATE.test(content) : false;
             const hasTemplateInFilename = VARIABLES.TEMPLATE.test(filename);
             const camelCase = snakeToCamel(appName);
             const upperCaseAppName = ucfirst(camelCase);
             const replace = str => str
+                .replace(VARIABLES.DATE_TEMPLATE, new Date().toDateString())
                 .replace(VARIABLES.TEMPLATE_FOR_REPLACE_LOWERCASE, appName)
                 .replace(VARIABLES.TEMPLATE_FOR_REPLACE_CAPITALCASE, upperCaseAppName);
 

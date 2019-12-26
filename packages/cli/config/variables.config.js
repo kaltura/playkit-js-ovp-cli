@@ -1,3 +1,4 @@
+const DATE_TEMPLATE = /__today_date__/ig;
 const TEMPLATE = /__plugin_name__/i;
 const TEMPLATE_FOR_REPLACE_LOWERCASE = /__plugin_name__/g;
 const TEMPLATE_FOR_REPLACE_CAPITALCASE = /__Plugin_Name__/g;
@@ -16,6 +17,7 @@ const modes = {
 const modesTypes = Object.keys(modes);
 
 module.exports = {
+    DATE_TEMPLATE,
     TEMPLATE,
     TEMPLATE_FOR_REPLACE_LOWERCASE,
     TEMPLATE_FOR_REPLACE_CAPITALCASE,
