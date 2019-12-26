@@ -37,7 +37,7 @@ Don't worry, you can easily change your answers when you need to.}`);
         const modes = await modeSelection();
         createConfigFiles(paths.appTest, modes);
 
-        return runScript(path.resolve(__dirname, '../update-client.js'), runStart);
+        return runScript(path.resolve(__dirname, './update-client.js'), runStart);
     } else {
         const envJson = require(paths.appEnv);
         const env = envJson.env[envJson.modes.bundlerEnv];

@@ -20,5 +20,5 @@ const program = new commander.Command('serve')
         return require('./update-client');
     }
 
-    return require('./start');
-})()
+    return require('./serve');
+})();
