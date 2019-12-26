@@ -39,8 +39,13 @@ Don't worry, you can easily change your answers when you need to.}`);
 
         return runScript(path.resolve(__dirname, './update-client.js'), runStart);
     } else {
+        const envJson = require(paths.appEnv);
+        const env = envJson.env[envJson.modes.bundlerEnv];
+
         console.log(chalk`{blue Found local serve configuration. 
-        
+        Current environment: ${env.bundler}
+        Player version: ${envJson.modes.bundler === "uiConf" ? 'uiConf' : envJson.bundler.customPlayerVersion}
+
 To modify them read 'test/readme.md' file}.`);
 
     }
