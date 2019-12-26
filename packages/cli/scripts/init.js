@@ -116,7 +116,7 @@ module.exports = function (
         "build": "kcontrib build",
         "build:dev": "kcontrib build --dev",
         "serve": "kcontrib serve",
-        "analyze": `npm run build && npx source-map-explorer dist/${pluginName}.js`,
+        "analyze": `npm run build && npx source-map-explorer dist/${appName}.js`,
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
         "husky:pre-commit": "lint-staged",
@@ -158,6 +158,11 @@ module.exports = function (
         );
         return;
     }
+
+    fs.writeFileSync(
+        paths.appInitialConfig,
+        JSON.stringify({pluginName: appName}, null, 2) + os.EOL
+    );
 
     // Rename gitignore after the fact to prevent npm from renaming it to .npmignore
     // See: https://github.com/npm/npm/issues/1862
