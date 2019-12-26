@@ -10,16 +10,23 @@ const contribTypes = {
 
 const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
-function getPlaykitPackages() {
+function getPlaykitPackages(ignoreList = []) {
+    ignoreList.push(VARIABLES.CLI_PLUGIN_NAME);
     const appPackageJson = require(paths.appPackageJson);
+    const getFromPackageJson = (dependencyType = 'dependencies') => {
+        return Object.keys(appPackageJson[dependencyType])
+            .reduce((playkitPackages, dependency) => {
+                const [_, playkitPackage] = dependency.split(`${VARIABLES.CONTRIB}/`);
 
-    return  Object.keys(appPackageJson.dependencies)
-        .reduce((playkitPackages, dependency) => {
-            const [_, playkitPackage] = dependency.split(`${VARIABLES.CONTRIB}/`);
+                return playkitPackage ? [...playkitPackages, playkitPackage] : playkitPackages;
+            }, [])
+            .filter(packageName => !ignoreList.includes(packageName))
+            .map(packageName => `${VARIABLES.CONTRIB}/${packageName}`);
+    };
 
-            return playkitPackage ? [...playkitPackages, playkitPackage] : playkitPackages;
-        }, [])
-        .map(packageName => `${VARIABLES.CONTRIB}/${packageName}`);
+    return []
+        .concat(getFromPackageJson())
+        .concat(getFromPackageJson("devDependencies"));
 };
 
 function installPackages(installStrategy, packages) {

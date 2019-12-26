@@ -4,6 +4,7 @@ const TEMPLATE_FOR_REPLACE_CAPITALCASE = /__Plugin_Name__/g;
 const CONTRIB = '@playkit-js-contrib';
 const REPO = 'https://github.com/kaltura/playkit-js-contrib.git';
 const TAG_PATTERN = 'kaltura-ovp-player@';
+const CLI_PLUGIN_NAME = 'create-contrib-plugin';
 
 const modes = {
     userType: ['annonymous', 'widgetId', 'ks'],
@@ -23,4 +24,5 @@ module.exports = {
     TAG_PATTERN,
     modes,
     modesTypes,
+    CLI_PLUGIN_NAME,
 };

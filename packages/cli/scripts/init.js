@@ -130,6 +130,7 @@ module.exports = function (
         "infra:latest": 'kcontrib infra --type=latest',
         "infra:next": 'kcontrib infra --type=next',
         "infra:local": 'kcontrib infra --type=local',
+        "infra:add": "kcontrib infra --add"
     };
 
     // Setup the browsers list
