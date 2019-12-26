@@ -54,7 +54,6 @@ To modify them read 'test/readme.md' file}.`);
 
 function createConfigFiles(appTestFolder, modes) {
     const configFilePath = path.resolve(__dirname, '../../config/config.json');
-    const readmeFilePath = path.resolve(__dirname, '../../config/readme.md');
     const envFile = require(path.resolve(__dirname, '../../config/env.json'));
 
     envFile.modes = modes;
@@ -64,7 +63,7 @@ function createConfigFiles(appTestFolder, modes) {
         JSON.stringify(envFile, null, 2) + os.EOL
     );
 
-    [readmeFilePath, configFilePath].forEach(file => fs.copyFileSync(file, `${appTestFolder}/${path.basename(file)}`));
+    [configFilePath].forEach(file => fs.copyFileSync(file, `${appTestFolder}/${path.basename(file)}`));
 
     console.log(`Config files were created successfully.
     For more info read the Readme at test/readme.md
