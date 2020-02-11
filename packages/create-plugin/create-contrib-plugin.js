@@ -46,6 +46,13 @@ const prompts = require("prompts");
 
 const packageJson = require('./package.json');
 
+function resolveHome(filepath) {
+  if (filepath[0] === '~') {
+    return path.join(process.env.HOME, filepath.slice(1));
+  }
+  return filepath;
+}
+
 // These files should be allowed to remain on a failed install,
 // but then silently removed during the next create.
 const errorLogFilePatterns = [
@@ -134,81 +141,81 @@ if (program.info) {
 }
 
 async function askProjectOptions() {
-    const validation = (pattern = /^[a-zA-Z-][a-zA-Z0-9-]*$/g) => input => {
-        if (!input) {
-            return "This field should not be empty.";
-        }
-
-        if (!pattern.test(input)) {
-            return "It is not valid! Please try again.";
-        }
-
-        return true;
-    };
-
-    const onCancel = prompt => {
-        console.log(`${chalk.red('Canceled!')}`);
-        process.exit(1);
-    };
-
-    if (projectName) {
-        projectDestination = path.resolve(projectName);
-        projectName = path.basename(projectDestination);
+  const validation = (pattern = /^[a-zA-Z-][a-zA-Z0-9-]*$/g) => input => {
+    if (!input) {
+      return "This field should not be empty.";
     }
 
-    const askName = {
-        type: "text",
-        name: "name",
-        message: `Please specify the project name:`,
-        validate: validation(),
-        initial: projectName,
-    };
+    if (!pattern.test(input)) {
+      return "It is not valid! Please try again.";
+    }
 
-    const askNpmName = name => ({
-        type: "text",
-        name: "npmName",
-        message: "Please specify the plugin NPM name:",
-        validate: validation(/^(@[a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
-        initial: `@playkit-js/${name}-plugin`,
-        required: true,
-    });
+    return true;
+  };
 
-    const askGithubRepo = name => ({
-        type: "text",
-        name: "githubRepo",
-        message: `Please specify the plugin GitHub repository:`,
-        validate: validation(/^([a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
-        initial: `kaltura/playkit-js-${name}`,
-        required: true,
-    });
+  const onCancel = prompt => {
+    console.log(`${chalk.red('Canceled!')}`);
+    process.exit(1);
+  };
 
-    const askDestination = (name) => ({
-        type: "text",
-        name: "destination",
-        message: `Please specify the destination folder where the plugin will be initialized:`,
-        initial: projectDestination || `${process.cwd()}/playkit-js-${name}`,
-        required: true,
-    });
+  if (projectName) {
+    projectDestination = path.resolve(projectName);
+    projectName = path.basename(projectDestination);
+  }
 
-    const {
-        name
-    } = await prompts(askName, {onCancel});
-    projectName = name;
+  const askName = {
+    type: "text",
+    name: "name",
+    message: `Please specify the project name:`,
+    validate: validation(),
+    initial: projectName,
+  };
 
-    const {
-        npmName
-    } = await prompts(askNpmName(projectName), {onCancel});
-    projectNpmName = npmName;
+  const askNpmName = name => ({
+    type: "text",
+    name: "npmName",
+    message: "Please specify the plugin NPM name:",
+    validate: validation(/^(@[a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
+    initial: `@playkit-js/${name}-plugin`,
+    required: true,
+  });
 
-    const {
-        githubRepo
-    } = await prompts(askGithubRepo(projectName), {onCancel});
-    projectGitRepo = githubRepo;
+  const askGithubRepo = name => ({
+    type: "text",
+    name: "githubRepo",
+    message: `Please specify the plugin GitHub repository:`,
+    validate: validation(/^([a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
+    initial: `kaltura/playkit-js-${name}`,
+    required: true,
+  });
 
-    const {
-        destination
-    } = await prompts(askDestination(projectName), {onCancel});
-    projectDestination = destination;
+  const askDestination = (name) => ({
+    type: "text",
+    name: "destination",
+    message: `Please specify the destination folder where the plugin will be initialized:`,
+    initial: projectDestination || `${process.cwd()}/playkit-js-${name}`,
+    required: true,
+  });
+
+  const {
+    name
+  } = await prompts(askName, {onCancel});
+  projectName = name;
+
+  const {
+    npmName
+  } = await prompts(askNpmName(projectName), {onCancel});
+  projectNpmName = npmName;
+
+  const {
+    githubRepo
+  } = await prompts(askGithubRepo(projectName), {onCancel});
+  projectGitRepo = githubRepo;
+
+  const {
+    destination
+  } = await prompts(askDestination(projectName), {onCancel});
+  projectDestination = path.resolve(resolveHome(destination.trim()));
 }
 
 function printValidationResults(results) {
