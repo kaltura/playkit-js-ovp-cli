@@ -11,7 +11,7 @@ const contribTypes = {
 const contribTypesValues = Object.keys(contribTypes).map(key => contribTypes[key]);
 
 function getPlaykitPackages(ignoreList = []) {
-    ignoreList.push(VARIABLES.CLI_PLUGIN_NAME);
+    ignoreList.push(...VARIABLES.CONTRIB_IGNORED_PACKAGES);
     const appPackageJson = require(paths.appPackageJson);
     const getFromPackageJson = (dependencyType = 'dependencies') => {
         return Object.keys(appPackageJson[dependencyType])
