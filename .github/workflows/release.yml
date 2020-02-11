@@ -1,0 +1,40 @@
+name: Publish Packages
+on:
+  push:
+    branches:
+      - master
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Prepare repository (For Lerna to publish successfully)
+        run: |
+          git checkout "${GITHUB_REF:11}"
+          git remote rm origin
+          git remote add origin https://${{ secrets.GITHUB_PUBLISHER_USERNAME }}:${{ secrets.GITHUB_TOKEN }}@github.com/kaltura/kaltura-path-ui-kit.git
+          git fetch --tags
+          git config user.email "${{ secrets.GITHUB_PUBLISHER_EMAIL }}"
+          git config user.name "${{ secrets.GITHUB_PUBLISHER_NAME }}"
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          npm set username ${{ secrets.NPM_USERNAME }}
+          npm set email ${{ secrets.NPM_EMAIL }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install dependencies and build libraries
+        run: npm ci
+      - name: Version the packages using Lerna
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx lerna version -y --conventional-commits --create-release github -m "[skip ci] publish %s"
+      - name: Publish the packages using Lerna
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx lerna publish from-package -y
+
