@@ -24,5 +24,5 @@ jobs:
       - name: Publish the packages canary versions using Lerna
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: lerna publish -y --canary --preid canary --dist-tag=canary
+        run: npx lerna publish -y --canary --preid canary --dist-tag=canary
 
