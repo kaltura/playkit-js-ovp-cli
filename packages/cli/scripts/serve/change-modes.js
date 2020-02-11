@@ -1,13 +1,13 @@
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const os = require('os');
-const VARIABLES = require('../config/variables.config');
+const VARIABLES = require('../../config/variables.config');
 const chalk = require('chalk');
 
 
-async function modeSelection() {
+async function modeSelection(initialValues = {}) {
     const onCancel = () => {
         console.log(`${chalk.red('Canceled!')}`);
         process.exit(1);
@@ -18,7 +18,7 @@ async function modeSelection() {
         name: mode,
         message: `Choose ${mode}:`,
         choices: VARIABLES.modes[mode].map(value => ({title: value, value})),
-        initial: 0,
+        initial: initialValues[mode] ? VARIABLES.modes[mode].findIndex(value => value === initialValues[mode]) : 0,
     }));
 
     return await prompts(chooseModes, {onCancel});
@@ -32,7 +32,7 @@ async function modeSelection() {
     }
 
     const envJson = require(paths.appEnv);
-    const modes = await modeSelection();
+    const modes = await modeSelection(envJson.modes);
     const updatedEnvJson = {
         ...envJson,
         modes,

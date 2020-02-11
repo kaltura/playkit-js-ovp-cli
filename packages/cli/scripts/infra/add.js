@@ -13,8 +13,7 @@ const {
 
 (async() => {
     const currentPackages = getPlaykitPackages();
-    const allPackages = await getAllPackages();
-    const packagesForFetch = allPackages.map(data => data.name);
+    const packagesForFetch = await getAllPackages();
 
     console.log('Currently installed packages are:\n', currentPackages.map(packageName => `- ${packageName}\n`).join(''));
 
@@ -23,8 +22,6 @@ const {
     if(!availableForInstall.length) {
         return console.log('All available packages already installed!');
     }
-
-    console.log('Available For Install:: ', availableForInstall);
 
     const {packages, tag} = await askForInstall(availableForInstall);
     const {installStrategy, npmTag} = chooseTagAndStrategy(tag);
@@ -36,7 +33,8 @@ const {
 })();
 
 function getAllPackages() {
-    return new Promise((resolve, reject) => {
+  const ignoreList = [...VARIABLES.CONTRIB_IGNORED_PACKAGES.map(name => `${VARIABLES.CONTRIB}/${name}`)];
+  return new Promise((resolve, reject) => {
         exec(`npm search --no-description --json ${VARIABLES.CONTRIB}/`, (error, data) => {
             if (error) {
                 console.error(
@@ -44,7 +42,10 @@ function getAllPackages() {
                 );
                 reject(error);
             }
-            resolve(JSON.parse(data));
+
+            const result = JSON.parse(data).map(data => data.name)
+              .filter(packageName => !ignoreList.includes(packageName));
+            resolve(result);
         });
     });
 }

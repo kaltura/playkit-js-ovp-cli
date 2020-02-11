@@ -1,9 +1,9 @@
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const chalk = require('chalk');
-const VARIABLES = require('../config/variables.config');
+const VARIABLES = require('../../config/variables.config');
 const {exec} = require('child_process');
 const os = require('os');
 
@@ -15,8 +15,8 @@ const os = require('os');
     }
 
     const envJson = require(paths.appEnv);
-
     const data = await getAllTags();
+    let chosenVersion;
 
     const playerVersions = data.split('\n')
         .filter(str => new RegExp(VARIABLES.TAG_PATTERN).test(str))
@@ -24,12 +24,18 @@ const os = require('os');
         .sort()
         .reverse();
 
-    const result = await askUserToChooseVersion(playerVersions, envJson.bundler.customPlayerVersion);
+    if(!envJson.bundler.customPlayerVersion) {
+        chosenVersion = {customPlayerVersion: playerVersions[0]};
+        console.log(chalk.yellow(`Setup latest version of the player.`));
+    } else {
+        chosenVersion = await askUserToChooseVersion(playerVersions, envJson.bundler.customPlayerVersion);
+    }
+
     const updatedEnvJson = {
         ...envJson,
         bundler: {
             ...envJson.bundler,
-            ...result
+            ...chosenVersion
         }
     };
 

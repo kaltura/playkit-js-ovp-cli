@@ -116,7 +116,9 @@ module.exports = function (
         "build": "kcontrib build",
         "build:dev": "kcontrib build --dev",
         "serve": "kcontrib serve",
-        "analyze": `npm run build && npx source-map-explorer dist/${pluginName}.js`,
+        "serve:update-modes": "kcontrib serve --update-modes",
+        "serve:update-player": "kcontrib serve --update-player",
+        "analyze": `npm run build && npx source-map-explorer dist/${appName}.js`,
         "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
         "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
         "husky:pre-commit": "lint-staged",
@@ -125,9 +127,10 @@ module.exports = function (
         "deploy:publish-to-npm": "kcontrib deploy --publish",
         "deploy:next:prepare": "kcontrib deploy --prepare --prerelease next",
 
-        "contrib:latest": 'kcontrib contrib --type=latest',
-        "contrib:next": 'kcontrib contrib --type=next',
-        "contrib:local": 'kcontrib contrib --type=local',
+        "infra:latest": 'kcontrib infra --type=latest',
+        "infra:next": 'kcontrib infra --type=next',
+        "infra:local": 'kcontrib infra --type=local',
+        "infra:add": "kcontrib infra --add"
     };
 
     // Setup the browsers list
@@ -158,6 +161,11 @@ module.exports = function (
         );
         return;
     }
+
+    fs.writeFileSync(
+        paths.appInitialConfig,
+        JSON.stringify({pluginName: appName}, null, 2) + os.EOL
+    );
 
     // Rename gitignore after the fact to prevent npm from renaming it to .npmignore
     // See: https://github.com/npm/npm/issues/1862
@@ -230,7 +238,7 @@ module.exports = function (
     console.log(`Success! Created ${appName} at ${appPath}`);
     console.log('Inside that directory, you can run several commands:');
     console.log();
-    console.log(chalk.cyan(`  ${displayedCommand} start`));
+    console.log(chalk.cyan(`  ${displayedCommand} run serve`));
     console.log('    Starts the development server.');
     console.log();
     console.log(
@@ -238,23 +246,13 @@ module.exports = function (
     );
     console.log('    Bundles the app into static files for production.');
     console.log();
-    console.log(chalk.cyan(`  ${displayedCommand} test`));
-    console.log('    Starts the test runner.');
-    console.log();
-    console.log(
-        chalk.cyan(`  ${displayedCommand} run eject`)
-    );
-    console.log(
-        '    Removes this tool and copies build dependencies, configuration files'
-    );
-    console.log(
-        '    and scripts into the app directory. If you do this, you can’t go back!'
-    );
+    console.log(chalk.cyan(`  ${displayedCommand} analyze`));
+    console.log('    Shows a treemap visualization of the plugin bundle.');
     console.log();
     console.log('We suggest that you begin by typing:');
     console.log();
     console.log(chalk.cyan('  cd'), cdpath);
-    console.log(`  ${chalk.cyan(`${displayedCommand} start`)}`);
+    console.log(`  ${chalk.cyan(`${displayedCommand} run serve`)}`);
     if (readmeExists) {
         console.log();
         console.log(
@@ -276,11 +274,15 @@ function replaceTemplate(appPath, appName) {
         .forEach(file => {
             const content = fs.readFileSync(file, 'utf8');
             const filename = path.basename(file);
-            const hasTemplateInContent = content ? VARIABLES.TEMPLATE.test(content) : false;
+            const hasTemplateInContent = content ? VARIABLES.TEMPLATE.test(content) || VARIABLES.DATE_TEMPLATE.test(content) : false;
             const hasTemplateInFilename = VARIABLES.TEMPLATE.test(filename);
             const camelCase = snakeToCamel(appName);
             const upperCaseAppName = ucfirst(camelCase);
+
+            const newDate = `${new Date().getFullYear()}-${('0' + new Date().getMonth()).slice(-2)}-${('0' + new Date().getDate()).slice(-2)}`;
+
             const replace = str => str
+                .replace(VARIABLES.DATE_TEMPLATE, newDate)
                 .replace(VARIABLES.TEMPLATE_FOR_REPLACE_LOWERCASE, appName)
                 .replace(VARIABLES.TEMPLATE_FOR_REPLACE_CAPITALCASE, upperCaseAppName);
 

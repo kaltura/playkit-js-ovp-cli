@@ -50,6 +50,7 @@ module.exports = {
     appPath: resolveApp('.'),
     appKalturaContrib: resolveApp('.kaltura-contrib'),
     appOverrideWebpack: resolveModule(resolveApp, '.kaltura-contrib/webpack.config'),
+    appInitialConfig: resolveApp('.kaltura-contrib/config.json'),
     appBuild: resolveApp('build'),
     appPublic: resolveApp('public'),
     appHtml: resolveApp('public/index.html'),

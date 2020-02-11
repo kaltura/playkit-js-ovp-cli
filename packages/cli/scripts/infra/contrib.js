@@ -13,7 +13,7 @@ const program = new commander.Command(packageJson.name)
     .version(packageJson.version)
     .option(
         '--type <latest|next|local>',
-        'choose a type of the contrib script'
+        'choose a type of the infra script'
     )
     .option(
         '--add',
@@ -28,12 +28,12 @@ const program = new commander.Command(packageJson.name)
 
     if (!program.type || !contribTypesValues.includes(program.type)) {
         return console.error(`
-        ${chalk.red('Please, provide one of the correct parameter for the contrib script.')}
+        ${chalk.red('Please, provide one of the correct parameter for the infra script.')}
             
             You could add playkit library to the project by running:
                 --add
             
-            For example: kcontrib contrib --add
+            For example: kcontrib infra --add
         
         
             Provide type parameter to update playkit libraries.
@@ -42,7 +42,7 @@ const program = new commander.Command(packageJson.name)
                 - ${contribTypes.NEXT}
                 - ${contribTypes.LOCAL}
                 
-            For example: kcontrib contrib --type=local
+            For example: kcontrib infra --type=local
     `);
     }
 

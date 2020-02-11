@@ -1,8 +1,9 @@
 const path = require('path');
+const paths = require('../config/paths');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 const distFolder = path.join(process.cwd(), "/dist");
-const pluginName = path.basename(process.cwd());
+const pluginName = require(paths.appInitialConfig).pluginName;
 
 module.exports = {
   entry: {

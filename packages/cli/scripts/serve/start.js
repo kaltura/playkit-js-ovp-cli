@@ -14,18 +14,15 @@ process.on('unhandledRejection', err => {
 const chalk = require('chalk');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const clearConsole = require('../utils/clearConsole');
 const {
     choosePort,
     createCompiler,
     prepareUrls,
 } = require('react-dev-utils/WebpackDevServerUtils');
 const openBrowser = require('react-dev-utils/openBrowser');
-const paths = require('../config/paths');
-const { appOverrideWebpack, appPath, appPackageJson, appPublic } = require('../config/paths');
-const path = require('path');
-const configFactory = require('../config/webpack.dev.js');
-const createDevServerConfig = require('../config/webpackDevServer.config');
+const paths = require('../../config/paths');
+const {appPackageJson} = require('../../config/paths');
+const configFactory = require('../../config/webpack.dev.js');
 
 const isInteractive = process.stdout.isTTY;
 
@@ -52,7 +49,7 @@ if (process.env.HOST) {
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.
-const { checkBrowsers } = require('react-dev-utils/browsersHelper');
+const {checkBrowsers} = require('react-dev-utils/browsersHelper');
 
 checkBrowsers(paths.appPath, isInteractive)
     .then(() => {
@@ -103,8 +100,8 @@ checkBrowsers(paths.appPath, isInteractive)
             openBrowser(urls.localUrlForBrowser);
         });
 
-        ['SIGINT', 'SIGTERM'].forEach(function(sig) {
-            process.on(sig, function() {
+        ['SIGINT', 'SIGTERM'].forEach(function (sig) {
+            process.on(sig, function () {
                 devServer.close();
                 process.exit();
             });

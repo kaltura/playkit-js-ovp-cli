@@ -1,10 +1,10 @@
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../../config/paths');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const os = require('os');
-const { runScript } = require('../utils');
-const VARIABLES = require('../config/variables.config');
+const { runScript } = require('../../utils');
+const VARIABLES = require('../../config/variables.config');
 const chalk = require('chalk');
 
 
@@ -39,8 +39,13 @@ Don't worry, you can easily change your answers when you need to.}`);
 
         return runScript(path.resolve(__dirname, './update-client.js'), runStart);
     } else {
+        const envJson = require(paths.appEnv);
+        const env = envJson.env[envJson.modes.bundlerEnv];
+
         console.log(chalk`{blue Found local serve configuration. 
-        
+        Current environment: ${env.bundler}
+        Player version: ${envJson.modes.bundler === "uiConf" ? 'uiConf' : envJson.bundler.customPlayerVersion}
+
 To modify them read 'test/readme.md' file}.`);
 
     }
@@ -48,9 +53,8 @@ To modify them read 'test/readme.md' file}.`);
 })();
 
 function createConfigFiles(appTestFolder, modes) {
-    const configFilePath = path.resolve(__dirname, '../config/config.json');
-    const readmeFilePath = path.resolve(__dirname, '../config/readme.md');
-    const envFile = require(path.resolve(__dirname, '../config/env.json'));
+    const configFilePath = path.resolve(__dirname, '../../config/config.json');
+    const envFile = require(path.resolve(__dirname, '../../config/env.json'));
 
     envFile.modes = modes;
 
@@ -59,7 +63,7 @@ function createConfigFiles(appTestFolder, modes) {
         JSON.stringify(envFile, null, 2) + os.EOL
     );
 
-    [readmeFilePath, configFilePath].forEach(file => fs.copyFileSync(file, `${appTestFolder}/${path.basename(file)}`));
+    [configFilePath].forEach(file => fs.copyFileSync(file, `${appTestFolder}/${path.basename(file)}`));
 
     console.log(`Config files were created successfully.
     For more info read the Readme at test/readme.md

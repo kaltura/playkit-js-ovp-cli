@@ -1,5 +1,5 @@
 const contrib = require('./contrib');
 
 exports.module = {
-    contrib,
+    infra: contrib,
 };
