@@ -1,5 +1,5 @@
 {
-  "name": "@playkit-js-contrib/create-plugin",
+  "name": "create-playkit-js-plugin",
   "version": "1.1.0",
   "description": "",
   "repository": {
@@ -11,12 +11,13 @@
     "node": ">=8"
   },
   "files": [
+    "bin",
     "index.js",
-    "create-contrib-plugin.js"
+    "create-contrib-plugin.js",
+    "LICENSE"
   ],
   "bin": {
-    "create": "./index.js",
-    "@playkit-js-contrib/create-plugin": "./index.js"
+    "create-playkit-js-plugin": "./bin/create.js"
   },
   "dependencies": {
     "chalk": "2.4.2",
@@ -30,5 +31,8 @@
     "tar-pack": "3.4.1",
     "tmp": "0.0.33",
     "validate-npm-package-name": "3.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
