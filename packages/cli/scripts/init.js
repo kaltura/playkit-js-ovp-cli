@@ -288,8 +288,10 @@ function replaceTemplate(appPath, appName) {
             const hasTemplateInFilename = VARIABLES.TEMPLATE.test(filename);
             const camelCase = snakeToCamel(appName);
             const upperCaseAppName = ucfirst(camelCase);
+
+            const newDate = `${new Date().getFullYear()}-${('0' + new Date().getMonth()).slice(-2)}-${('0' + new Date().getDate()).slice(-2)}`
             const replace = str => str
-                .replace(VARIABLES.DATE_TEMPLATE, new Date().toDateString())
+                .replace(VARIABLES.DATE_TEMPLATE, newDate)
                 .replace(VARIABLES.TEMPLATE_FOR_REPLACE_LOWERCASE, appName)
                 .replace(VARIABLES.TEMPLATE_FOR_REPLACE_CAPITALCASE, upperCaseAppName);
 
