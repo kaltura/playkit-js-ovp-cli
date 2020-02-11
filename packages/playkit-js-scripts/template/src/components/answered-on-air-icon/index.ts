@@ -1,1 +1,0 @@
-export { AnsweredOnAirIcon } from "./answeredOnAirIcon";
