@@ -11,6 +11,7 @@
         "ignored-file",
         "*.md"
       ]
-    },
+    }
+  },
   "version": "1.0.0"
 }
