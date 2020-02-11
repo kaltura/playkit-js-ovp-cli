@@ -15,7 +15,8 @@
     "create-contrib-plugin.js"
   ],
   "bin": {
-    "create": "./index.js"
+    "create": "./index.js",
+    "@playkit-js-contrib/create-plugin": "./index.js"
   },
   "dependencies": {
     "chalk": "2.4.2",

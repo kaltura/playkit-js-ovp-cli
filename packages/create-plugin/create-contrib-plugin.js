@@ -90,36 +90,28 @@ const program = new commander.Command(packageJson.name)
         console.log(`      - a specific npm tag: ${chalk.green('@next')}`);
         console.log(
             `      - a custom fork published on npm: ${chalk.green(
-                'my-react-scripts'
+                'my-playkit-js-contrib-scripts'
             )}`
         );
         console.log(
             `      - a local path relative to the current working directory: ${chalk.green(
-                'file:../my-react-scripts'
+                'file:../my-playkit-js-contrib-scripts'
             )}`
         );
         console.log(
             `      - a .tgz archive: ${chalk.green(
-                'https://mysite.com/my-react-scripts-0.8.2.tgz'
+                'https://mysite.com/my-playkit-js-contrib-scripts-0.8.2.tgz'
             )}`
         );
         console.log(
             `      - a .tar.gz archive: ${chalk.green(
-                'https://mysite.com/my-react-scripts-0.8.2.tar.gz'
+                'https://mysite.com/my-playkit-js-contrib-scripts-0.8.2.tar.gz'
             )}`
         );
         console.log(
             `    It is not needed unless you specifically want to use a fork.`
         );
         console.log();
-        console.log(
-            `    If you have any problems, do not hesitate to file an issue:`
-        );
-        console.log(
-            `      ${chalk.cyan(
-                'https://github.com/facebook/create-react-app/issues/new'
-            )}`
-        );
         console.log();
     })
     .parse(process.argv);
@@ -141,13 +133,13 @@ if (program.info) {
 }
 
 async function askProjectOptions() {
-  const validation = (pattern = /^[a-zA-Z-][a-zA-Z0-9-]*$/g) => input => {
+  const validation = (pattern = /^[a-z][a-z0-9-]*$/) => input => {
     if (!input) {
-      return "This field should not be empty.";
+      return "This value should not be empty.";
     }
 
     if (!pattern.test(input)) {
-      return "It is not valid! Please try again.";
+      return 'The value is invalid. Use lower case characters, numbers or dash only.';
     }
 
     return true;
@@ -175,7 +167,7 @@ async function askProjectOptions() {
     type: "text",
     name: "npmName",
     message: "Please specify the plugin NPM name:",
-    validate: validation(/^(@[a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
+    validate: validation(/^(@[a-z][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/),
     initial: `@playkit-js/${name}-plugin`,
     required: true,
   });
@@ -184,7 +176,7 @@ async function askProjectOptions() {
     type: "text",
     name: "githubRepo",
     message: `Please specify the plugin GitHub repository:`,
-    validate: validation(/^([a-z-][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z-][a-z0-9-]+)$/g),
+    validate: validation(/^([a-z][a-z0-9-]+\/[a-z-][a-z0-9-]+|^[a-z][a-z0-9-]+)$/),
     initial: `kaltura/playkit-js-${name}`,
     required: true,
   });
@@ -235,7 +227,8 @@ function printValidationResults(results) {
             '(internal usage only, DO NOT RELY ON THIS) ' +
             'use a non-standard application template'
         )
-        .parse(process.argv);
+      .allowUnknownOption()
+      .parse(process.argv);
 
     createApp(
         projectName,
@@ -458,27 +451,25 @@ function run(
 }
 
 function getInstallPackage(version, originalDirectory) {
-    // let packageToInstall = 'playkit-js-scripts';
-    // const validSemver = semver.valid(version);
-    // if (validSemver) {
-    //     packageToInstall += `@${validSemver}`;
-    // } else if (version) {
-    //     if (version[0] === '@' && version.indexOf('/') === -1) {
-    //         packageToInstall += version;
-    //     } else if (version.match(/^file:/)) {
-    //         packageToInstall = `file:${path.resolve(
-    //             originalDirectory,
-    //             version.match(/^file:(.*)?$/)[1]
-    //         )}`;
-    //     } else {
-    //         // for tar.gz or alternative paths
-    //         packageToInstall = version;
-    //     }
-    // }
-    return `file:${path.resolve(
-        __dirname,
-        '../cli'
-    )}`;
+    let packageToInstall = '@playkit-js-contrib/cli';
+    const validSemver = semver.valid(version);
+    if (validSemver) {
+        packageToInstall += `@${validSemver}`;
+    } else if (version) {
+        if (version[0] === '@' && version.indexOf('/') === -1) {
+            packageToInstall += version;
+        } else if (version.match(/^file:/)) {
+            packageToInstall = `file:${path.resolve(
+                originalDirectory,
+                version.match(/^file:(.*)?$/)[1]
+            )}`;
+        } else {
+            // for tar.gz or alternative paths
+            packageToInstall = version;
+        }
+    }
+
+    return packageToInstall;
 }
 
 function getTemporaryDirectory() {
