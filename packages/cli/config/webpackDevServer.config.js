@@ -9,11 +9,11 @@ module.exports = function() {
         compress: true,
         clientLogLevel: 'none',
         watchContentBase: true,
-        inline: true,
         hot: true,
         publicPath: '/',
         quiet: true,
         watchOptions: {
+            poll: true,
             ignored: ignoredFiles(appSrc),
         },
         index: "index.html",
