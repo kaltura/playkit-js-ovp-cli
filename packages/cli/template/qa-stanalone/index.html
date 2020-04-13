@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Info - Player V7</title>
+
+        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.50.0-vamb.1"></script>
+        <script src="__plugin_name__.js"></script>
+        <script src="../latest.js"></script>
+
+        <link rel="stylesheet" style="text/css" href="assets/styles/bootstrap.css" />
+        <style>
+            h1,
+            #player-div {
+                margin-left: 1%;
+            }
+            .test-form {
+                font-family: Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+                    "Ubuntu", "Helvetica Neue", Arial, sans-serif;
+                display: flex;
+                flex-flow: row wrap;
+                max-width: 800px;
+            }
+
+            .test-form > div {
+                display: flex;
+                flex-wrap: wrap;
+                margin: 0 22px 4px 4px;
+            }
+
+            .test-form .form-group {
+                min-width: 30%;
+                margin: 4px 1%;
+            }
+            .test-form div:not(.form-group):not(.controls) {
+                display: flex;
+                align-items: flex-end;
+                min-width: 100%;
+                margin: 8px 1%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>__plugin_name__ - Player V7 [ <span id="latest-id"></span> ]</h1>
+        <form action="" class="test-form"></form>
+        <br />
+        <div id="errorMsg" style="display: none; color: darkred; margin-left: 4px;">
+            Please fill all the params above!
+        </div>
+
+        <!-- Player -->
+        <div style="position:relative;margin-top:10px">
+            <div id="player-div"></div>
+        </div>
+
+        <script type="text/javascript" src="assets/jquery.min.js"></script>
+        <script type="text/javascript" src="assets/underscore.js"></script>
+        <script type="text/javascript" src="assets/jsonform.js"></script>
+
+        <script type="text/javascript">
+            var version = "0.0.1";
+
+            var generalSchema = {
+                entryId: {
+                  type: 'string',
+                  title: 'EntryId',
+                  required: true
+                },
+                ks: {
+                  type: 'string',
+                  title: 'ks for playback and BE API'
+                },
+                partnerId: {
+                  type: 'string',
+                  title: 'owner of this entry-id',
+                  required: true
+                },
+                uiConfId: {
+                  type: 'string',
+                  title: 'uiConfId',
+                  required: true
+                },
+                width: {
+                  type: 'number',
+                  title: 'width',
+                  default: 800
+                },
+                height: {
+                  type: 'number',
+                  title: 'height',
+                  default: 480
+                },
+                prodOrQA: {
+                    type: "string",
+                    title: "Envinroment",
+                    enum: [ "prod", "qa" ],
+                    default: "qa"
+                },
+                autoplay: {
+                    type: "boolean",
+                    title: "Autoplay",
+                    default: false
+                },
+            };
+            var pluginConfSchema = {
+                // plugin configuration placeholder
+                // keep schema according to https://github.com/jsonform/jsonform rules
+            }
+            $('form.test-form').jsonForm({
+              schema: Object.assign({}, generalSchema, pluginConfSchema),
+              onSubmit: function (errors, values) {
+                if (errors) {
+                    var errorMsg = document.getElementById("errorMsg");
+                    errorMsg.style.display = "block";
+                }
+                else {
+                    errorMsg.style.display = "none";
+                    console.log(values)
+                }
+              }
+            });
+
+            var errorMsg = document.getElementById("errorMsg");
+            var isValid = false;
+
+            // get search params from url string
+            var urlParams = new urlParamParse(window.location.search);
+            var pluginConfiguration = {};
+            _.each(pluginConfSchema, function(item, key) {
+                var param = urlParams.get(key);
+                if (param !== null) {
+                    if (item.type === "string") {
+                        if (param === "0") {
+                            $('form.test-form .form-control[name=' + key + ']').val("");
+                        } else {
+                            pluginConfiguration[key] = param;
+                            $('form.test-form .form-control[name=' + key + ']').val(param);
+                        }
+                    } else if (item.type === "boolean") {
+                        pluginConfiguration[key] = param === "1";
+                        $('form.test-form input[type="checkbox"][name=' + key + ']').prop('checked', param === "1");
+                    } else {
+                        pluginConfiguration[key] = param;
+                        $('form.test-form .form-control[name=' + key + ']').val(param);
+                    }
+                }
+            });
+
+            var entryId = urlParams.get("entryId");
+            var ks = urlParams.get("ks");
+            var partnerId = urlParams.get("partnerId");
+            var uiConfId = urlParams.get("uiConfId");
+            var width = urlParams.get("width") >>> 0;
+            var height = urlParams.get("height") >>> 0;
+            var prodOrQA = urlParams.get("prodOrQA");
+            var autoplay = urlParams.get("autoplay");
+            var env;
+
+            // Insert params to form and put default values when needed
+            if (entryId) $('form.test-form .form-control[name="entryId"]').val(entryId);
+            if (ks && ks !== "0") $('form.test-form .form-control[name="ks"]').val(ks);
+            if (partnerId) $('form.test-form .form-control[name="partnerId"]').val(partnerId);
+            if (uiConfId) $('form.test-form .form-control[name="uiConfId"]').val(uiConfId);
+
+            if (!width) {
+                width = 800;
+            }
+            $('form.test-form .form-control[name="width"]').val(width)
+
+            if (!height) {
+                height = 480;
+            }
+            $('form.test-form .form-control[name="height"]').val(height)
+
+            if (prodOrQA && prodOrQA === "qa") {
+                env = {
+                    serviceUrl: "https://qa-apache-php7.dev.kaltura.com/api_v3",
+                    cdnUrl: "https://qa-nginx-vod.dev.kaltura.com"
+                };
+            } else {
+                // default
+                prodOrQA = "prod";
+                env = {
+                    serviceUrl: "https://www.kaltura.com/api_v3",
+                    cdnUrl: "https://www.kaltura.com"
+                };
+            }
+            $('form.test-form .form-control[name="prodOrQA"]').val(prodOrQA);
+
+            if (autoplay && autoplay === "1") {
+                autoplay = true;
+            } else {
+                autoplay = false;
+            }
+            $('form.test-form input[type="checkbox"][name="autoplay"]').prop('checked', autoplay);
+
+
+            // Validation check
+            if (entryId && partnerId && uiConfId) {
+                errorMsg.style.display = "none";
+                isValid = true;
+            } else {
+                errorMsg.style.display = "block";
+            }
+
+            // init player size:
+            var playerDiv = document.getElementById("player-div");
+            playerDiv.style.width = width + "px";
+            playerDiv.style.height = height + "px";
+
+            if (isValid) {
+                var plugins = {
+                    '__plugin_name__': pluginConfiguration
+                };
+
+                var player;
+                function changeMedia() {
+                    player.loadMedia({
+                        entryId: switchMediaEntryId
+                    });
+                }
+
+                const contrib = {
+                    ui: {
+                        fonts: {
+                            fontFamily: "Lato, sans-serif",
+
+                            // optional property for overriding font existence testing
+                            // testingFont: { text: 'aaaaa', size: 72, fontName : 'Lato'}
+
+                            // optional property. relevant only for this test page
+                            // mediaspace will provide Lato font by default
+                            downloadData: {
+                                url: "https://fonts.googleapis.com/css?family=Lato&display=swap",
+                                name: "Lato"
+                            }
+                        }
+                    }
+                };
+
+                var config = {
+                    logLevel: "DEBUG",
+                    targetId: "player-div",
+                    session: {},
+                    contrib: contrib,
+                    plugins: plugins,
+                    playback: {
+                        autoplay: autoplay
+                    },
+                    ui: {
+                        debug: true
+                    }
+                };
+                var provider = {
+                        env: env,
+                        partnerId: partnerId,
+                        uiConfId: uiConfId,
+                    }
+                if (ks && ks !== "0") {
+                    provider.ks = ks;
+                }
+                config.provider = provider;
+                
+                window.onload = function() {
+                    var mediaInfo = { entryId: entryId };
+                    player = KalturaPlayer.setup(config);
+                    player.loadMedia(mediaInfo);
+                };
+            }
+
+            /*
+             * Get url params
+             * replace the URLSearchParams as IE doesn't support it
+             * */
+            function urlParamParse(url) {
+                this.url = url;
+
+                this.get = function(name) {
+                    var results = new RegExp("[\?&]" + name + "=([^&#]*)").exec(this.url);
+                    if (results == null) {
+                        return null;
+                    } else {
+                        return unescape(decodeURI(results[1]) || 0);
+                    }
+                };
+            }
+        </script>
+        <script>
+            var color = "#FF0000";
+            if (this.latest && this.latest === this.version ){
+                document.getElementById("latest-id").innerText = " LATEST - "+ this.latest;
+                color = "#1c7b22"
+            }else if(this.latest){
+                document.getElementById("latest-id").innerText = this.latest+ " - NOT LATEST"
+            }else{
+                document.getElementById("latest-id").innerText = "dev mode"
+            }
+            document.getElementById("latest-id").style.color = color;
+        </script>
+    </body>
+</html>
