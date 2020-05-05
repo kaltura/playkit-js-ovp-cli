@@ -424,7 +424,8 @@ function run(
 }
 
 function getInstallPackage(version, originalDirectory) {
-    let packageToInstall = '@playkit-js-contrib/cli';
+    // let packageToInstall = '@playkit-js-contrib/cli';
+    let packageToInstall = '/Users/semarche/dev/kaltura/playkit-js-contrib-cli/packages/cli';
     const validSemver = semver.valid(version);
     if (validSemver) {
         packageToInstall += `@${validSemver}`;
