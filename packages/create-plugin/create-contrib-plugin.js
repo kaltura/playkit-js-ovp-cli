@@ -311,7 +311,7 @@ function run(
     template,
 ) {
     const packageToInstall = getInstallPackage(version, originalDirectory);
-    const allDependencies = ['preact@8.x', packageToInstall];
+    const allDependencies = [packageToInstall];
     allDependencies.push(
         '@playkit-js-contrib/common',
         "@playkit-js-contrib/plugin",
@@ -320,6 +320,7 @@ function run(
     );
 
     const devDependencies = [
+        'preact@10.x',
         '@types/node',
         "@types/classnames",
         "@commitlint/cli@8.x",
@@ -676,7 +677,7 @@ function setCaretRangeForRuntimeDeps(packageName) {
         process.exit(1);
     }
 
-    makeCaretRange(packageJson.dependencies, 'preact');
+    makeCaretRange(packageJson.devDependencies, 'preact');
 
     fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + os.EOL);
 }
