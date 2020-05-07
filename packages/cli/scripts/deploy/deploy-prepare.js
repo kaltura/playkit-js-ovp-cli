@@ -112,6 +112,8 @@ module.exports = async function run(options) {
         runSpawn('npm', ['install']);
         console.log(chalk.blue(`build code and run open analyzer`));
         runSpawn('npm', ['run', 'analyze']);
+        console.log(chalk.blue(`copy code and translates to qa-standalone folder`));
+        runSpawn('npm', ['run', 'copy-resources']);
         console.log(chalk.blue(`run standard version`));
 
         await standardVersion({

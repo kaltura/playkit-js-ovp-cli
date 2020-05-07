@@ -9,6 +9,26 @@
         <script src="__plugin_name__.js"></script>
         <script src="../latest.js"></script>
 
+        <script>
+            function loadJSON(path, callback) {
+                const xobj = new XMLHttpRequest();
+                xobj.overrideMimeType("application/json");
+                xobj.open('GET', path, true);
+                xobj.onreadystatechange = function () {
+                    if (xobj.readyState === 4 && xobj.status.toString() === "200") {
+                        callback(xobj.responseText);
+                    }
+                };
+                xobj.send(null);
+            }
+            function fetchTranslates(callback) {
+                loadJSON('./translates/langs.i18n.json', function(lang) {
+                        const langOptions = JSON.parse(lang);
+                        return callback(langOptions);
+                })
+            }
+        </script>
+        
         <link rel="stylesheet" style="text/css" href="assets/styles/bootstrap.css" />
         <style>
             h1,
@@ -265,9 +285,12 @@
                 config.provider = provider;
                 
                 window.onload = function() {
-                    var mediaInfo = { entryId: entryId };
-                    player = KalturaPlayer.setup(config);
-                    player.loadMedia(mediaInfo);
+                    fetchTranslates(function(lang) {
+                        config.ui.translations = lang;
+                        var mediaInfo = { entryId: entryId };
+                        player = KalturaPlayer.setup(config);
+                        player.loadMedia(mediaInfo);
+                    })
                 };
             }
 
