@@ -8,7 +8,25 @@
         <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.53.4-vamb.1"></script>
         <script src="__plugin_name__.js"></script>
         <script src="../latest.js"></script>
-
+        <script>
+            function loadJSON(path, callback) {
+                const xobj = new XMLHttpRequest();
+                xobj.overrideMimeType("application/json");
+                xobj.open('GET', path, true);
+                xobj.onreadystatechange = function () {
+                    if (xobj.readyState === 4 && xobj.status.toString() === "200") {
+                        callback(xobj.responseText);
+                    }
+                };
+                xobj.send(null);
+            }
+            function fetchTranslates(callback) {
+                loadJSON('./translates/langs.i18n.json', function(lang) {
+                        const langOptions = JSON.parse(lang);
+                        return callback(langOptions);
+                })
+            }
+        </script>
         <link rel="stylesheet" style="text/css" href="assets/styles/bootstrap.css" />
         <style>
             h1,
@@ -33,11 +51,30 @@
                 min-width: 30%;
                 margin: 4px 1%;
             }
+
+            .test-form .form-group ._jsonform-array-ul {
+                padding: 0;
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .test-form .form-group li {
+                margin-right: 8px;
+            }
+
+            .test-form .form-group ._jsonform-array-buttons {
+                display: flex;
+            }
+
             .test-form div:not(.form-group):not(.controls) {
                 display: flex;
                 align-items: flex-end;
+                flex-wrap: wrap;
                 min-width: 100%;
                 margin: 8px 1%;
+            }
+            .change-media-button {
+                margin-left: 1%;
+                margin-top: 12px;
             }
         </style>
     </head>
@@ -54,27 +91,37 @@
         <div style="position:relative;margin-top:10px">
             <div id="player-div"></div>
         </div>
+        
+        <div class="change-media-button">
+            <input class="btn btn-info " value="Change Media">
+        </div>
 
         <script type="text/javascript" src="assets/jquery.min.js"></script>
         <script type="text/javascript" src="assets/underscore.js"></script>
         <script type="text/javascript" src="assets/jsonform.js"></script>
 
         <script type="text/javascript">
-            var version = "0.0.1";
+            var version = "0.0.0"; // TODO: automatically upgrade plugin version
 
+            // schema documentation:
+            // https://github.com/jsonform/jsonform/wiki#previous
             var generalSchema = {
                 entryId: {
                   type: 'string',
                   title: 'EntryId',
                   required: true
                 },
+                changeMediaEntryId: {
+                  type: 'string',
+                  title: 'Change media EntryId'
+                },
                 ks: {
                   type: 'string',
-                  title: 'ks for playback and BE API'
+                  title: 'KS'
                 },
                 partnerId: {
                   type: 'string',
-                  title: 'owner of this entry-id',
+                  title: 'partnerId',
                   required: true
                 },
                 uiConfId: {
@@ -95,7 +142,7 @@
                 prodOrQA: {
                     type: "string",
                     title: "Envinroment",
-                    enum: [ "prod", "qa" ],
+                    enum: ["qa", "prod"],
                     default: "qa"
                 },
                 autoplay: {
@@ -109,71 +156,54 @@
                 // keep schema according to https://github.com/jsonform/jsonform rules
                 // playground and examples https://jsonform.github.io/jsonform/playground/index.html
             }
+            $('form.test-form').submit(function(event) {
+                event.preventDefault();
+                document.location.reload(true);
+            })
+            var mergedSchema = Object.assign({}, generalSchema, pluginConfSchema);
+            var formValues = parseHash(location.hash);
+            // set default values
+            _.each(mergedSchema, function(value, key) {
+                if (formValues[key] === undefined && value.default !== undefined) {
+                    formValues[key] = value.default;
+                }
+            })
             $('form.test-form').jsonForm({
-              schema: Object.assign({}, generalSchema, pluginConfSchema),
+              schema: mergedSchema,
+              value: formValues,
               onSubmit: function (errors, values) {
+                var errorMsg = document.getElementById("errorMsg");
+                var val = JSON.stringify(values);
+                if(history.pushState) {
+                    history.pushState(null, null, '#' + val);
+                }
+                else {
+                    location.hash = '#' + val;
+                }
                 if (errors) {
-                    var errorMsg = document.getElementById("errorMsg");
                     errorMsg.style.display = "block";
                 }
                 else {
                     errorMsg.style.display = "none";
-                    console.log(values)
+                    document.location.reload(true);
                 }
               }
             });
 
+            var pluginConfiguration = _.omit(formValues, _.keys(generalSchema));
+
             var errorMsg = document.getElementById("errorMsg");
             var isValid = false;
 
-            // get search params from url string
-            var urlParams = new urlParamParse(window.location.search);
-            var pluginConfiguration = {};
-            _.each(pluginConfSchema, function(item, key) {
-                var param = urlParams.get(key);
-                if (param !== null) {
-                    if (item.type === "string") {
-                        if (param === "0") {
-                            $('form.test-form .form-control[name=' + key + ']').val("");
-                        } else {
-                            pluginConfiguration[key] = param;
-                            $('form.test-form .form-control[name=' + key + ']').val(param);
-                        }
-                    } else if (item.type === "boolean") {
-                        pluginConfiguration[key] = param === "1";
-                        $('form.test-form input[type="checkbox"][name=' + key + ']').prop('checked', param === "1");
-                    } else {
-                        pluginConfiguration[key] = param;
-                        $('form.test-form .form-control[name=' + key + ']').val(param);
-                    }
-                }
-            });
-
-            var entryId = urlParams.get("entryId");
-            var ks = urlParams.get("ks");
-            var partnerId = urlParams.get("partnerId");
-            var uiConfId = urlParams.get("uiConfId");
-            var width = urlParams.get("width") >>> 0;
-            var height = urlParams.get("height") >>> 0;
-            var prodOrQA = urlParams.get("prodOrQA");
-            var autoplay = urlParams.get("autoplay");
+            var entryId = formValues.entryId;
+            var ks = formValues.ks;
+            var partnerId = formValues.partnerId;
+            var uiConfId = formValues.uiConfId;
+            var width = formValues.width >>> 0;
+            var height = formValues.height >>> 0;
+            var prodOrQA = formValues.prodOrQA;
+            var autoplay = formValues.autoplay;
             var env;
-
-            // Insert params to form and put default values when needed
-            if (entryId) $('form.test-form .form-control[name="entryId"]').val(entryId);
-            if (ks && ks !== "0") $('form.test-form .form-control[name="ks"]').val(ks);
-            if (partnerId) $('form.test-form .form-control[name="partnerId"]').val(partnerId);
-            if (uiConfId) $('form.test-form .form-control[name="uiConfId"]').val(uiConfId);
-
-            if (!width) {
-                width = 800;
-            }
-            $('form.test-form .form-control[name="width"]').val(width)
-
-            if (!height) {
-                height = 480;
-            }
-            $('form.test-form .form-control[name="height"]').val(height)
 
             if (prodOrQA && prodOrQA === "qa") {
                 env = {
@@ -188,15 +218,6 @@
                     cdnUrl: "https://www.kaltura.com"
                 };
             }
-            $('form.test-form .form-control[name="prodOrQA"]').val(prodOrQA);
-
-            if (autoplay && autoplay === "1") {
-                autoplay = true;
-            } else {
-                autoplay = false;
-            }
-            $('form.test-form input[type="checkbox"][name="autoplay"]').prop('checked', autoplay);
-
 
             // Validation check
             if (entryId && partnerId && uiConfId) {
@@ -217,11 +238,11 @@
                 };
 
                 var player;
-                function changeMedia() {
+                $('.change-media-button input').click(function(){
                     player.loadMedia({
-                        entryId: switchMediaEntryId
+                        entryId: formValues.changeMediaEntryId
                     });
-                }
+                })
 
                 var contrib = {
                     ui: {
@@ -265,28 +286,27 @@
                 config.provider = provider;
                 
                 window.onload = function() {
-                    var mediaInfo = { entryId: entryId };
-                    player = KalturaPlayer.setup(config);
-                    player.loadMedia(mediaInfo);
+                    fetchTranslates(function(lang) {
+                        config.ui.translations = lang;
+                        var mediaInfo = { entryId: entryId };
+                        player = KalturaPlayer.setup(config);
+                        player.loadMedia(mediaInfo);
+                    })
                 };
             }
 
-            /*
-             * Get url params
-             * replace the URLSearchParams as IE doesn't support it
-             * */
-            function urlParamParse(url) {
-                this.url = url;
-
-                this.get = function(name) {
-                    var results = new RegExp("[\?&]" + name + "=([^&#]*)").exec(this.url);
-                    if (results == null) {
-                        return null;
-                    } else {
-                        return unescape(decodeURI(results[1]) || 0);
-                    }
-                };
+        function parseHash(queryString) {
+            var query = {};
+            try {
+                var cleanedString = queryString.slice(1).replace(/%22/g, '"');
+                if (cleanedString) {
+                    query = JSON.parse(cleanedString);
+                }
+            } catch(e) {
+                console.error(e);
             }
+            return query;
+        }
         </script>
         <script>
             var color = "#FF0000";

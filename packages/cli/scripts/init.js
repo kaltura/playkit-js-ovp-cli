@@ -126,6 +126,7 @@ module.exports = function (
         "deploy:prepare": "kcontrib deploy --prepare",
         "deploy:publish-to-npm": "kcontrib deploy --publish",
         "deploy:next:prepare": "kcontrib deploy --prepare --prerelease next",
+        "copy-resources": "cp ./dist/* ./qa-standalone/ && cp -r ./translates ./qa-standalone/ && cp -r ./translates ./dist/",
 
         "infra:latest": 'kcontrib infra --type=latest',
         "infra:next": 'kcontrib infra --type=next',
